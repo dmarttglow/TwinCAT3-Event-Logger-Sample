@@ -138,17 +138,18 @@ td code, th code { white-space: nowrap; }
 <h3 id="safer">Safer<a class="anchor" href="#safer" aria-label="Link to section">#</a></h3>
 <ul><li><strong>Mistakes show up at compile time.</strong> <code>GVL_EventTexts.ConvyorJam</code> (misspelled) doesn't compile, and autocomplete lists every event.</li><li><strong>Source info is unique automatically.</strong> It defaults to the instance path of the alarm, so <code>MAIN.fbConveyor.fbOverTemperature</code> and <code>MAIN.fbPump.fbOverTemperature</code> never collide.</li><li><strong>Lazy creation.</strong> <code>CreateEx</code> runs on first use, never in <code>FB_init</code>, so the order in which things are initialized doesn't matter.</li><li><strong>Text formatting is bounded.</strong> Placeholders are filled in a single pass with length limits, so long or odd arguments can't overflow the text.</li></ul>
 <h3 id="easier-to-maintain">Easier to maintain<a class="anchor" href="#easier-to-maintain" aria-label="Link to section">#</a></h3>
-<ul><li><strong>All texts are in one readable file.</strong> <code>GVL_EventTexts</code> is plain Structured Text, so diffs are clean and easy to review.</li><li><strong>Translations sit next to the original text</strong>, on the same line.</li><li><strong>Ready to become a library.</strong> Everything in <code>EventFramework/</code> is independent of the application and can be packaged as a <code>.library</code>.</li></ul>
+<ul><li><strong>All texts are in one readable file.</strong> <code>GVL_EventTexts</code> is plain Structured Text, so diffs are clean and easy to review.</li><li><strong>Translations sit next to the original text</strong>, on the same line.</li><li><strong>Packaged as a library.</strong> <code>EventFramework</code> is independent of any application and ships as a <code>.library</code>.</li></ul>
 <h3 id="easy-to-extend">Easy to extend<a class="anchor" href="#easy-to-extend" aria-label="Link to section">#</a></h3>
-<ul><li>New behaviour plugs in through interfaces, for example a CSV text source, another formatter or a different TMC mapping.</li><li>The wiring lives in one place, the composition root <code>GVL_Events</code>. Alarm declarations and machine code don't change.</li></ul>
+<ul><li>New behaviour plugs in through interfaces, for example a CSV text source, another formatter or a different TMC mapping.</li><li>The library wires a default composition root, <code>GVL_EventDefaults</code>. An application can replace any single service there, and alarm declarations and machine code don't change.</li></ul>
 <hr>
 <h2 id="4-quick-start">4. Quick start<a class="anchor" href="#4-quick-start" aria-label="Link to section">#</a></h2>
+<p><strong>Once per application:</strong> reference the <code>EventFramework</code> library. It brings the <code>GenericEvents</code> event class and all the wiring with it.</p>
 <p><strong>1. Define the event</strong> in <code>GVLs/GVL_EventTexts</code>:</p>
 <pre class="lang-iecst"><span class="tag">Structured Text</span><code>ConveyorJam : ST_EventDefinition := (nId := <span class="n">203</span>, eSeverity := TcEventSeverity.Error,
                                      asText := [<span class="s">'Conveyor {0} jammed at {1} mm'</span>]);</code></pre>
 <p><strong>2. Declare an alarm</strong> where you need it:</p>
 <pre class="lang-iecst"><span class="tag">Structured Text</span><code><span class="k">VAR</span>
-    fbJam : FB_CatalogAlarm(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.ConveyorJam);
+    fbJam : FB_CatalogAlarm(stDefinition := GVL_EventTexts.ConveyorJam);
 <span class="k">END_VAR</span></code></pre>
 <p><strong>3. Drive it</strong> in the cyclic code:</p>
 <pre class="lang-iecst"><span class="tag">Structured Text</span><code>fbJam.Arguments.Clear().AddString(<span class="s">'Infeed'</span>).AddDInt(nPosition);
@@ -163,14 +164,14 @@ fbJam.SetActive(bJamDetected);</code></pre>
 <div class="table"><table><thead><tr><th>Member</th><th>Description</th></tr></thead><tbody><tr><td><code>SetActive(bActive)</code></td><td>Driven by the current state of a condition: raises the alarm while <code>bActive</code> is TRUE and clears it when <code>bActive</code> goes FALSE. This is usually all you need.</td></tr><tr><td><code>Raise()</code></td><td>Raises the alarm. Does nothing if it is already raised, which keeps the original text and timestamp.</td></tr><tr><td><code>Clear(bResetConfirmation)</code></td><td>Clears the alarm.</td></tr><tr><td><code>Confirm()</code></td><td>Confirms the alarm, for alarms with <code>bWithConfirmation</code>.</td></tr><tr><td><code>IsRaised</code></td><td>Whether the alarm is currently raised.</td></tr><tr><td><code>ConfirmationState</code></td><td>The event logger's confirmation state.</td></tr></tbody></table></div>
 <h3 id="messages--fbcatalogmessage-imessage">Messages – <code>FB_CatalogMessage</code> (<code>I_Message</code>)<a class="anchor" href="#messages--fbcatalogmessage-imessage" aria-label="Link to section">#</a></h3>
 <p>A message is a one-time event, such as "machine started" or a trace.</p>
-<pre class="lang-iecst"><span class="tag">Structured Text</span><code>fbStarted : FB_CatalogMessage(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.MachineStarted);
+<pre class="lang-iecst"><span class="tag">Structured Text</span><code>fbStarted : FB_CatalogMessage(stDefinition := GVL_EventTexts.MachineStarted);
 ...
 <span class="k">IF</span> rtStart.Q <span class="k">THEN</span>
     fbStarted.Arguments.Clear().AddString(<span class="s">'Line 1'</span>).AddString(<span class="s">'Operator'</span>);
     fbStarted.Send();
 <span class="k">END_IF</span></code></pre>
 <h3 id="shared-members-icatalogevent">Shared members (<code>I_CatalogEvent</code>)<a class="anchor" href="#shared-members-icatalogevent" aria-label="Link to section">#</a></h3>
-<div class="table"><table><thead><tr><th>Member</th><th>Description</th></tr></thead><tbody><tr><td><code>Arguments</code></td><td>Fluent builder: <code>Clear()</code>, <code>AddString</code>, <code>AddDInt</code>, <code>AddLReal(value, decimals)</code>, <code>AddBool</code>. Up to 10 arguments, <code>{0}</code> to <code>{9}</code>.</td></tr><tr><td><code>Severity</code></td><td>The severity from the definition.</td></tr><tr><td><code>LastResult</code></td><td>HRESULT of the last event logger call. Use it for diagnostics.</td></tr><tr><td><code>SourceName</code></td><td>Optional override of the source name. The default is the instance path. Only takes effect before the first raise or send.</td></tr></tbody></table></div>
+<div class="table"><table><thead><tr><th>Member</th><th>Description</th></tr></thead><tbody><tr><td><code>Arguments</code></td><td>Fluent builder: <code>Clear()</code>, <code>AddString</code>, <code>AddDInt</code>, <code>AddLReal(value, decimals)</code>, <code>AddBool</code>. Up to 10 arguments, <code>{0}</code> to <code>{9}</code>.</td></tr><tr><td><code>Severity</code></td><td>The severity from the definition.</td></tr><tr><td><code>LastResult</code></td><td>HRESULT of the last event logger call. Use it for diagnostics.</td></tr><tr><td><code>SourceName</code></td><td>Optional override of the source name. The default is the instance path. Only takes effect before the first raise or send.</td></tr><tr><td><code>Context</code></td><td>The event services this event uses. The default is <code>GVL_EventDefaults.fbContext</code>. Set it to inject a different <code>I_EventContext</code> for this one event. Only takes effect before the first raise or send.</td></tr></tbody></table></div>
 <h3 id="arguments-are-taken-over-when-the-event-is-raised">Arguments are taken over when the event is raised<a class="anchor" href="#arguments-are-taken-over-when-the-event-is-raised" aria-label="Link to section">#</a></h3>
 <p>You can refresh arguments every cycle. They are only used at the moment the alarm is raised or the message is sent. A raised alarm keeps the text it was raised with.</p>
 <pre class="lang-iecst"><span class="tag">Structured Text</span><code>fbOverTemp.Arguments.Clear().AddString(sName).AddLReal(fTemperature, <span class="n">1</span>).AddLReal(<span class="n">85</span>, <span class="n">0</span>);
@@ -182,7 +183,7 @@ fbOverTemp.SetActive(fTemperature &gt; <span class="n">85</span>);</code></pre>
 <hr>
 <h2 id="6-languages">6. Languages<a class="anchor" href="#6-languages" aria-label="Link to section">#</a></h2>
 <p>Each line in the text list holds one text per language, in the order of <code>E_Language</code>.</p>
-<p><strong>Adding a language:</strong></p>
+<p><strong>Adding a language</strong> (steps 1 and 2 are in the library, so release a new library version):</p>
 <ol><li><p>Add a value to <code>E_Language</code>:</p>
 <pre class="lang-iecst"><span class="tag">Structured Text</span><code>( English := <span class="n">0</span>, German := <span class="n">1</span> ) <span class="k">USINT</span>;</code></pre>
 </li><li>Raise <code>GVL_EventFramework.cLanguageCount</code> to <code>2</code>.</li><li><p>Add the translation to each line:</p>
@@ -191,7 +192,7 @@ fbOverTemp.SetActive(fTemperature &gt; <span class="n">85</span>);</code></pre>
                <span class="s">'Motor {0}: Übertemperatur ({1} °C, Grenze {2} °C)'</span>]);        <span class="c">// German</span></code></pre>
 </li></ol>
 <p><strong>Switching language at runtime:</strong></p>
-<pre class="lang-iecst"><span class="tag">Structured Text</span><code>GVL_Events.fbLanguage.Current := E_Language.German;</code></pre>
+<pre class="lang-iecst"><span class="tag">Structured Text</span><code>GVL_EventDefaults.fbLanguage.Current := E_Language.German;</code></pre>
 <p>How the language rules work:</p>
 <ul><li>A missing translation falls back to the first language, so you can translate one line at a time.</li><li><code>{n}</code> always refers to the n-th argument, so a translation can reorder the placeholders.</li><li>A language change affects events raised after the change. Alarms that are already active keep their text.</li><li>Characters like <code>ü</code>, <code>ß</code> and <code>°</code> fit in <code>STRING</code>. Check how the HMI displays them. Alphabets such as Chinese or Russian would need <code>WSTRING</code> throughout the framework.</li></ul>
 <hr>
@@ -208,12 +209,13 @@ fbOverTemp.SetActive(fTemperature &gt; <span class="n">85</span>);</code></pre>
 201;0;Motor {0}: over temperature ({1} degC, limit {2} degC)
 201;1;Motor {0}: Übertemperatur ({1} °C, Grenze {2} °C)
 203;1;Förderband {0} blockiert bei {1} mm</code></pre>
-<p>Turning it on changes only the composition root:</p>
-<pre class="lang-iecst"><span class="tag">Structured Text</span><code><span class="c">// GVL_Events</span>
-fbCsvTexts : FB_CsvTextProvider(ipFallback := fbDefinitionTexts);
-fbContext  : FB_EventContext(ipTexts := fbCsvTexts, ipLanguage := fbLanguage,
-                             ipFormatter := fbFormatter, ipEventEntries := fbEventClass);</code></pre>
-<p>Call <code>GVL_Events.fbCsvTexts()</code> every cycle so the file loading can make progress. Until the file has loaded, and for any id the file doesn't contain, the texts compiled into <code>GVL_EventTexts</code> are used. The machine keeps working even if the file is missing.</p>
+<p>Turning it on swaps one service in the default context:</p>
+<pre class="lang-iecst"><span class="tag">Structured Text</span><code><span class="c">// an application GVL, e.g. GVL_App</span>
+fbCsvTexts : FB_CsvTextProvider(ipFallback := GVL_EventDefaults.fbDefinitionTexts);
+
+<span class="c">// once at startup, before the first event is raised</span>
+GVL_EventDefaults.fbContext.Texts := GVL_App.fbCsvTexts;</code></pre>
+<p>Call <code>GVL_App.fbCsvTexts()</code> every cycle so the file loading can make progress. Until the file has loaded, and for any id the file doesn't contain, the texts compiled into <code>GVL_EventTexts</code> are used. The machine keeps working even if the file is missing.</p>
 <hr>
 <h2 id="8-architecture">8. Architecture<a class="anchor" href="#8-architecture" aria-label="Link to section">#</a></h2>
 <h3 id="class-diagram">Class diagram<a class="anchor" href="#class-diagram" aria-label="Link to section">#</a></h3>
@@ -248,39 +250,43 @@ fbContext  : FB_EventContext(ipTexts := fbCsvTexts, ipLanguage := fbLanguage,
 <ul><li>gets the current language from <code>I_LanguageProvider</code></li><li>gets the text for that language from <code>I_TextProvider</code></li><li>fills in the arguments with <code>I_TextFormatter</code></li></ul>
 </li><li>The finished text is passed as argument <code>{0}</code>, then <code>FB_TcAlarm.Raise(0)</code> is called.</li></ol>
 <h3 id="how-the-design-follows-solid">How the design follows SOLID<a class="anchor" href="#how-the-design-follows-solid" aria-label="Link to section">#</a></h3>
-<div class="table"><table><thead><tr><th>Principle</th><th>Where</th></tr></thead><tbody><tr><td><strong>S</strong>ingle responsibility</td><td>Each block has one job: text provider supplies the text, the language selector holds the language, the formatter formats, the entry provider maps to the TMC, the alarm and message handle the event logger.</td></tr><tr><td><strong>O</strong>pen/closed</td><td>New events are data. New text sources, formatters or mappings are new blocks, and existing code doesn't change.</td></tr><tr><td><strong>L</strong>iskov substitution</td><td>Alarms and messages can be used anywhere an <code>I_CatalogEvent</code> is expected. Any <code>I_TextProvider</code> can replace another.</td></tr><tr><td><strong>I</strong>nterface segregation</td><td>Arguments have a write side (<code>I_ArgumentBuilder</code>) for application code and a read side (<code>I_ArgumentSource</code>) for the formatter.</td></tr><tr><td><strong>D</strong>ependency inversion</td><td>Events depend only on interfaces. <code>GVL_Events</code> is the one place that wires concrete blocks together.</td></tr></tbody></table></div>
+<div class="table"><table><thead><tr><th>Principle</th><th>Where</th></tr></thead><tbody><tr><td><strong>S</strong>ingle responsibility</td><td>Each block has one job: text provider supplies the text, the language selector holds the language, the formatter formats, the entry provider maps to the TMC, the alarm and message handle the event logger.</td></tr><tr><td><strong>O</strong>pen/closed</td><td>New events are data. New text sources, formatters or mappings are new blocks, and existing code doesn't change.</td></tr><tr><td><strong>L</strong>iskov substitution</td><td>Alarms and messages can be used anywhere an <code>I_CatalogEvent</code> is expected. Any <code>I_TextProvider</code> can replace another.</td></tr><tr><td><strong>I</strong>nterface segregation</td><td>Arguments have a write side (<code>I_ArgumentBuilder</code>) for application code and a read side (<code>I_ArgumentSource</code>) for the formatter.</td></tr><tr><td><strong>D</strong>ependency inversion</td><td>Events depend only on interfaces. <code>GVL_EventDefaults</code> is the one place that wires concrete blocks together, and applications override parts of it through <code>FB_EventContext</code>'s setters.</td></tr></tbody></table></div>
 <hr>
 <h2 id="9-project-structure">9. Project structure<a class="anchor" href="#9-project-structure" aria-label="Link to section">#</a></h2>
-<pre class="diagram"><code>EventLoggerSample (PLC)
-├── EventFramework/                  reusable part, could become a library
-│   ├── GVL_EventFramework           constants: max arguments, language count, HRESULTs
-│   ├── DUTs/
-│   │   ├── E_Language
-│   │   └── ST_EventDefinition
-│   ├── Interfaces/
-│   │   ├── I_Alarm, I_Message, I_CatalogEvent
-│   │   ├── I_ArgumentBuilder, I_ArgumentSource
-│   │   ├── I_TextProvider, I_LanguageProvider, I_TextFormatter
-│   │   └── I_EventEntryProvider, I_EventContext
-│   └── POUs/
-│       ├── FB_CatalogEventBase      abstract base
-│       ├── FB_CatalogAlarm
-│       ├── FB_CatalogMessage
-│       ├── FB_EventArgs
-│       ├── FB_PlaceholderFormatter
-│       ├── FB_DefinitionTextProvider
-│       ├── FB_LanguageSelector
-│       ├── FB_GenericEventClass     maps severity → TC_EVENTS.GenericEvents.*
-│       └── FB_EventContext
+<p>The framework is a PLC library. The sample is a separate PLC project that references it.</p>
+<pre class="diagram"><code>EventFramework (PLC library project – saved and installed as library "EventFramework")
+├── GenericEvents                    pinned event class (Verbose/Info/Warning/Error/Critical, text "{0}")
+├── GVL_EventDefaults                default composition root (texts, language, formatter, event class, context)
+├── GVL_EventFramework               constants: max arguments, language count, HRESULTs
+├── DUTs/
+│   ├── E_Language
+│   └── ST_EventDefinition
+├── Interfaces/
+│   ├── I_Alarm, I_Message, I_CatalogEvent
+│   ├── I_ArgumentBuilder, I_ArgumentSource
+│   ├── I_TextProvider, I_LanguageProvider, I_TextFormatter
+│   └── I_EventEntryProvider, I_EventContext
+└── POUs/
+    ├── FB_CatalogEventBase          abstract base
+    ├── FB_CatalogAlarm
+    ├── FB_CatalogMessage
+    ├── FB_EventArgs
+    ├── FB_PlaceholderFormatter
+    ├── FB_DefinitionTextProvider
+    ├── FB_LanguageSelector
+    ├── FB_GenericEventClass         I_EventEntryProvider: maps severity → TC_EVENTS.GenericEvents.*
+    └── FB_EventContext
+
+EventLoggerSample (PLC application – references the EventFramework library)
 ├── GVLs/
-│   ├── GVL_EventTexts               ← the text list: the only place to add events
-│   └── GVL_Events                   composition root (wiring)
+│   └── GVL_EventTexts               ← the text list: the only place to add events
 └── POUs/
     ├── FB_Motor                     example component with three alarms
-    └── MAIN                         demo: two motors, a door alarm, messages
-
-System project (.tsproj)
-└── Type System → Event Classes → GenericEvents   (Verbose/Info/Warning/Error/Critical, text "{0}")</code></pre>
+    └── MAIN                         demo: two motors, a door alarm, messages</code></pre>
+<p>The <code>GenericEvents</code> event class is pinned in the library (<em>Add → Global Data Type…</em>; on 4024 <em>External Types → Pin Global Data Type</em>). TwinCAT then adds it to the type system of every project that references the library, so <code>TC_EVENTS.GenericEvents.*</code> exists there without anyone editing the TMC. <code>FB_GenericEventClass</code> is the only block that names it.</p>
+<h3 id="using-the-library-in-a-project">Using the library in a project<a class="anchor" href="#using-the-library-in-a-project" aria-label="Link to section">#</a></h3>
+<ol><li>Open <code>EventFramework</code> and use <em>Save as library and install</em>. Raise <code>ProjectVersion</code> in the project properties for each release.</li><li>In the application, add the <code>EventFramework</code> library reference (plus <code>Tc3_EventLogger</code>).</li><li>Write your own <code>GVL_EventTexts</code> and declare <code>FB_CatalogAlarm(stDefinition := …)</code> / <code>FB_CatalogMessage(stDefinition := …)</code> where you need them.</li></ol>
+<p>To map severities onto a different event class, write your own <code>I_EventEntryProvider</code> and set it at startup: <code>GVL_EventDefaults.fbContext.EventEntries := fbMyEventClass;</code>.</p>
 <h3 id="trying-the-demo">Trying the demo<a class="anchor" href="#trying-the-demo" aria-label="Link to section">#</a></h3>
 <p>Go online and change the variables in <code>MAIN</code>:</p>
 <div class="table"><table><thead><tr><th>Variable</th><th>Result</th></tr></thead><tbody><tr><td><code>fConveyorTemperature := 75</code></td><td>Warning: <em>Motor Conveyor: temperature high (75.0 degC, limit 70 degC)</em></td></tr><tr><td><code>fConveyorTemperature := 90</code> and <code>fPumpTemperature := 90</code></td><td>Two Error alarms on the same TMC event, active at the same time</td></tr><tr><td><code>fPumpCurrent := 15</code></td><td>Error: <em>Motor Pump: over current (15.00 A, limit 12.0 A)</em></td></tr><tr><td><code>bDoorOpen := TRUE</code>, then <code>bConfirmDoor</code></td><td>Critical alarm that needs confirming</td></tr><tr><td><code>bStart</code> / <code>bStop</code> / <code>bTrace</code></td><td>Info and Verbose messages</td></tr></tbody></table></div>
@@ -289,7 +295,7 @@ System project (.tsproj)
 <div class="table"><table><thead><tr><th>Topic</th><th>Details</th></tr></thead><tbody><tr><td>Language per HMI client</td><td>The text is built in the PLC when the event is raised. The whole PLC uses one language, and an active alarm keeps the language it was raised in. TwinCAT's native TMC translation, which works per HMI client, doesn't apply to these events.</td></tr><tr><td>Filtering in the HMI</td><td>All events share the class <code>GenericEvents</code>, so filter by severity, source name or source id (<code>nId</code>), not by event class or event id.</td></tr><tr><td>Text length</td><td>Up to 160 characters per template and 255 after formatting. Up to 10 arguments (<code>{0}</code> to <code>{9}</code>).</td></tr><tr><td>Unique <code>nId</code></td><td>Nothing checks that ids are unique. Duplicates still work for alarms, because source names differ, but a CSV override would apply to both.</td></tr><tr><td>Character set</td><td><code>STRING</code>. Non-Latin alphabets need <code>WSTRING</code>.</td></tr><tr><td>Memory</td><td>Each instance keeps a copy of its definition, which is roughly 160 bytes per language. This is negligible on an IPC.</td></tr></tbody></table></div>
 <hr>
 <h2 id="11-troubleshooting">11. Troubleshooting<a class="anchor" href="#11-troubleshooting" aria-label="Link to section">#</a></h2>
-<div class="table"><table><thead><tr><th>Symptom</th><th>Cause and fix</th></tr></thead><tbody><tr><td><code>TC_EVENTS.GenericEvents</code> unknown at build</td><td>The event class is missing. Check <em>Type System → Event Classes</em> and make sure the names are <code>Verbose</code>, <code>Info</code>, <code>Warning</code>, <code>Error</code> and <code>Critical</code>.</td></tr><tr><td>Nothing appears in the logger</td><td>Check <code>fbAlarm.LastResult</code>. <code>HR_NO_CONTEXT</code> (<code>16#80004003</code>) means <code>ipContext</code> wasn't passed in.</td></tr><tr><td>The text shows a raw <code>{2}</code></td><td>The text uses a placeholder with no argument. Add the argument, or fix the text.</td></tr><tr><td>A text appears in English despite a language switch</td><td>The translation is empty, or the alarm was raised before the switch.</td></tr><tr><td>The alarm text doesn't update while raised</td><td>This is intentional. Arguments are taken over when the alarm is raised. Clear and raise again to refresh the text.</td></tr><tr><td><code>SourceName</code> override has no effect</td><td>Set it before the first <code>Raise</code>, <code>SetActive</code> or <code>Send</code>.</td></tr></tbody></table></div>
+<div class="table"><table><thead><tr><th>Symptom</th><th>Cause and fix</th></tr></thead><tbody><tr><td><code>TC_EVENTS.GenericEvents</code> unknown at build</td><td>The event class is missing. It must be pinned in the library (<em>Add → Global Data Type…</em>) before the library is saved. In the type system, check that the event names are <code>Verbose</code>, <code>Info</code>, <code>Warning</code>, <code>Error</code> and <code>Critical</code>.</td></tr><tr><td>Nothing appears in the logger</td><td>Check <code>fbAlarm.LastResult</code>. <code>HR_NO_CONTEXT</code> (<code>16#80004003</code>) means a custom context has no <code>I_EventEntryProvider</code> (<code>EventEntries</code> is empty).</td></tr><tr><td>The text shows a raw <code>{2}</code></td><td>The text uses a placeholder with no argument. Add the argument, or fix the text.</td></tr><tr><td>A text appears in English despite a language switch</td><td>The translation is empty, or the alarm was raised before the switch.</td></tr><tr><td>The alarm text doesn't update while raised</td><td>This is intentional. Arguments are taken over when the alarm is raised. Clear and raise again to refresh the text.</td></tr><tr><td><code>SourceName</code> override has no effect</td><td>Set it before the first <code>Raise</code>, <code>SetActive</code> or <code>Send</code>.</td></tr></tbody></table></div>
 </article></main>
 </div>
 <script>

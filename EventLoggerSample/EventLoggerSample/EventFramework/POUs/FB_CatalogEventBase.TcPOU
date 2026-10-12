@@ -6,7 +6,8 @@
 //  - owns a unique source info (default name = instance path, nId = definition nId),
 //    so any number of catalog events can be active at the same time even when
 //    they map onto the same generic TMC event
-//  - gets the text in the current language and renders it with the injected formatter
+//  - gets the text in the current language and renders it with the context's formatter
+//  - uses GVL_EventDefaults.fbContext unless another context is set via Context
 // Derived blocks only create/drive their concrete Tc3_EventLogger object.
 {attribute 'reflection'}
 FUNCTION_BLOCK ABSTRACT FB_CatalogEventBase IMPLEMENTS I_CatalogEvent
@@ -16,7 +17,7 @@ VAR
 	_sInstancePath	: T_MaxString;
 END_VAR
 VAR
-	_ipContext		: I_EventContext;
+	_ipContext		: I_EventContext;		// 0 = GVL_EventDefaults.fbContext
 	_stDefinition	: ST_EventDefinition;
 	_fbSourceInfo	: FB_TcSourceInfo;
 	_fbArguments	: FB_EventArgs;
@@ -33,13 +34,11 @@ END_VAR
 VAR_INPUT
 	bInitRetains	: BOOL;
 	bInCopyCode		: BOOL;
-	ipContext		: I_EventContext;
 	stDefinition	: ST_EventDefinition;	// e.g. GVL_EventTexts.ConveyorJam
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[_ipContext := ipContext;
-_stDefinition := stDefinition;
+        <ST><![CDATA[_stDefinition := stDefinition;
 ]]></ST>
       </Implementation>
     </Method>
@@ -47,6 +46,7 @@ _stDefinition := stDefinition;
       <Declaration><![CDATA[// Lazily creates the event logger object on first use.
 METHOD PROTECTED EnsureCreated : BOOL
 VAR
+	ipContext	: I_EventContext;
 	ipEntries	: I_EventEntryProvider;
 END_VAR
 ]]></Declaration>
@@ -56,12 +56,14 @@ END_VAR
 	RETURN;
 END_IF
 
-IF _ipContext = 0 THEN
+ipContext := Context;
+IF ipContext = 0 THEN
 	_hrLast := GVL_EventFramework.HR_NO_CONTEXT;
 	RETURN;
 END_IF
 
-ipEntries := _ipContext.EventEntries;
+// No TMC mapping (only possible when a custom context leaves EventEntries empty)
+ipEntries := ipContext.EventEntries;
 IF ipEntries = 0 THEN
 	_hrLast := GVL_EventFramework.HR_NO_CONTEXT;
 	RETURN;
@@ -98,6 +100,7 @@ END_VAR
       <Declaration><![CDATA[// Template in the current language, placeholders replaced by the arguments.
 METHOD PROTECTED BuildText : T_MaxString
 VAR
+	ipContext	: I_EventContext;
 	ipTexts		: I_TextProvider;
 	ipLanguage	: I_LanguageProvider;
 	ipFormatter	: I_TextFormatter;
@@ -106,9 +109,10 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[ipTexts := _ipContext.Texts;
-ipLanguage := _ipContext.Language;
-ipFormatter := _ipContext.Formatter;
+        <ST><![CDATA[ipContext := Context;
+ipTexts := ipContext.Texts;
+ipLanguage := ipContext.Language;
+ipFormatter := ipContext.Formatter;
 
 IF ipLanguage <> 0 THEN
 	eLanguage := ipLanguage.Current;
@@ -143,6 +147,35 @@ END_VAR
 ]]></ST>
         </Implementation>
       </Get>
+    </Property>
+    <Property Name="Context" Id="{7ef03313-673d-43fc-a1f3-d5525a81722e}">
+      <Declaration><![CDATA[// Event services used by this event (default: GVL_EventDefaults.fbContext).
+// Set it only to inject a different context; only effective before the first Raise/Send.
+PROPERTY Context : I_EventContext]]></Declaration>
+      <Get Name="Get" Id="{6349445d-fd04-4223-8760-4a22bcff9125}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IF _ipContext <> 0 THEN
+	Context := _ipContext;
+ELSE
+	Context := GVL_EventDefaults.fbContext;
+END_IF
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{a611e5b3-2cc3-47b5-8739-509bf8f72142}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IF NOT _bCreated THEN
+	_ipContext := Context;
+END_IF
+]]></ST>
+        </Implementation>
+      </Set>
     </Property>
     <Property Name="Severity" Id="{d5f818c9-5737-4f12-8d38-d6fac10ef447}">
       <Declaration><![CDATA[PROPERTY Severity : TcEventSeverity]]></Declaration>

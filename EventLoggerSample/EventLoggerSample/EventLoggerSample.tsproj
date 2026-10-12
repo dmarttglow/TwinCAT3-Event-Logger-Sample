@@ -48,7 +48,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{EA22082E-84E5-4C2F-BB70-F26FC7FF8DFF}" Name="EventLoggerSample" PrjFilePath="EventLoggerSample\EventLoggerSample.plcproj" TmcFilePath="EventLoggerSample\EventLoggerSample.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{1931FFFF-C319-0559-E184-1E42B6357461}" TmcPath="EventLoggerSample\EventLoggerSample.tmc">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{EAEF9573-DB9F-2E90-C51E-18645EADD011}" TmcPath="EventLoggerSample\EventLoggerSample.tmc">
 					<Name>EventLoggerSample Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Contexts>
@@ -66,6 +66,13 @@
 					<TaskPouOids>
 						<TaskPouOid Prio="20" OTCID="#x08502001"/>
 					</TaskPouOids>
+				</Instance>
+			</Project>
+			<Project Disabled="true" GUID="{3DA8DF9E-6F30-400B-86E8-9E13DD2F5A30}" Name="EventFramework" PrjFilePath="EventFramework\EventFramework.plcproj" TmcFilePath="EventFramework\EventFramework.tmc" ReloadTmc="true" AmsPort="852" FileArchiveSettings="#x000e" SymbolicMapping="true">
+				<Instance Id="#x08502040" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{E73567BF-5746-8DC6-7B1F-5023D3BD41BD}" TmcPath="EventFramework\EventFramework.tmc">
+					<Name>EventFramework Instance</Name>
+					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
+					<JsonDynPous><![CDATA[null]]></JsonDynPous>
 				</Instance>
 			</Project>
 		</Plc>

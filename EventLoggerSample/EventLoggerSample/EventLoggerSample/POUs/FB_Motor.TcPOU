@@ -10,9 +10,9 @@ VAR_INPUT
 	fCurrent		: LREAL;
 END_VAR
 VAR
-	fbHighTemperature	: FB_CatalogAlarm(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.MotorHighTemperature);
-	fbOverTemperature	: FB_CatalogAlarm(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.MotorOverTemperature);
-	fbOverCurrent		: FB_CatalogAlarm(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.MotorOverCurrent);
+	fbHighTemperature	: FB_CatalogAlarm(stDefinition := GVL_EventTexts.MotorHighTemperature);
+	fbOverTemperature	: FB_CatalogAlarm(stDefinition := GVL_EventTexts.MotorOverTemperature);
+	fbOverCurrent		: FB_CatalogAlarm(stDefinition := GVL_EventTexts.MotorOverCurrent);
 END_VAR
 VAR CONSTANT
 	cWarnTemperature	: LREAL := 70.0;

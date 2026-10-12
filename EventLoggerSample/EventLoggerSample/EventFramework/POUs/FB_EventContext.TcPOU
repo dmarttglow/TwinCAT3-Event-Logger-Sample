@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
   <POU Name="FB_EventContext" Id="{d1caea09-763a-4400-95a8-32d8d88b23a9}" SpecialFunc="None">
-    <Declaration><![CDATA[// Composition of the event services, built once in the application's composition root.
+    <Declaration><![CDATA[// Composition of the event services, built once in a composition root (see GVL_EventDefaults).
+// The setters let an application swap a single service; set them before the first event is raised.
 FUNCTION_BLOCK FB_EventContext IMPLEMENTS I_EventContext
 VAR
 	_ipTexts		: I_TextProvider;
@@ -43,6 +44,15 @@ END_VAR
 ]]></ST>
         </Implementation>
       </Get>
+      <Set Name="Set" Id="{d53de5c5-6a52-429e-881d-8c0d79a39c59}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_ipTexts := Texts;
+]]></ST>
+        </Implementation>
+      </Set>
     </Property>
     <Property Name="Language" Id="{71f66701-5201-42a1-af3b-d49b1ab4f252}">
       <Declaration><![CDATA[PROPERTY Language : I_LanguageProvider]]></Declaration>
@@ -55,6 +65,15 @@ END_VAR
 ]]></ST>
         </Implementation>
       </Get>
+      <Set Name="Set" Id="{29851781-8028-4e4a-897c-a4dce799b889}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_ipLanguage := Language;
+]]></ST>
+        </Implementation>
+      </Set>
     </Property>
     <Property Name="Formatter" Id="{7aa437eb-2ecf-412f-8fbf-0a1cde23722b}">
       <Declaration><![CDATA[PROPERTY Formatter : I_TextFormatter]]></Declaration>
@@ -67,6 +86,15 @@ END_VAR
 ]]></ST>
         </Implementation>
       </Get>
+      <Set Name="Set" Id="{a2b8511e-8bbe-441d-a293-61809fb1c441}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_ipFormatter := Formatter;
+]]></ST>
+        </Implementation>
+      </Set>
     </Property>
     <Property Name="EventEntries" Id="{c81f2f39-765b-451b-9c4e-4a0ac4f0a59f}">
       <Declaration><![CDATA[PROPERTY EventEntries : I_EventEntryProvider]]></Declaration>
@@ -79,6 +107,15 @@ END_VAR
 ]]></ST>
         </Implementation>
       </Get>
+      <Set Name="Set" Id="{7ee7a522-1646-464c-9acb-8caa6b306e0e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_ipEventEntries := EventEntries;
+]]></ST>
+        </Implementation>
+      </Set>
     </Property>
   </POU>
 </TcPlcObject>

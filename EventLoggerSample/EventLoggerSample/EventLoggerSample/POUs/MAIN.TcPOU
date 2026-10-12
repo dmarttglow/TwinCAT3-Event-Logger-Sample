@@ -17,10 +17,10 @@ VAR
 	fbConveyor	: FB_Motor;
 	fbPump		: FB_Motor;
 
-	fbDoorOpen	: FB_CatalogAlarm(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.DoorOpen);
-	fbStarted	: FB_CatalogMessage(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.MachineStarted);
-	fbStopped	: FB_CatalogMessage(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.MachineStopped);
-	fbTrace		: FB_CatalogMessage(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.DebugTrace);
+	fbDoorOpen	: FB_CatalogAlarm(stDefinition := GVL_EventTexts.DoorOpen);
+	fbStarted	: FB_CatalogMessage(stDefinition := GVL_EventTexts.MachineStarted);
+	fbStopped	: FB_CatalogMessage(stDefinition := GVL_EventTexts.MachineStopped);
+	fbTrace		: FB_CatalogMessage(stDefinition := GVL_EventTexts.DebugTrace);
 
 	rtStart		: R_TRIG;
 	rtStop		: R_TRIG;

@@ -91,15 +91,17 @@ The TMC only describes **severities**. The PLC owns the **texts**.
 ### Easier to maintain
 - **All texts are in one readable file.** `GVL_EventTexts` is plain Structured Text, so diffs are clean and easy to review.
 - **Translations sit next to the original text**, on the same line.
-- **Ready to become a library.** Everything in `EventFramework/` is independent of the application and can be packaged as a `.library`.
+- **Packaged as a library.** `EventFramework` is independent of any application and ships as a `.library`.
 
 ### Easy to extend
 - New behaviour plugs in through interfaces, for example a CSV text source, another formatter or a different TMC mapping.
-- The wiring lives in one place, the composition root `GVL_Events`. Alarm declarations and machine code don't change.
+- The library wires a default composition root, `GVL_EventDefaults`. An application can replace any single service there, and alarm declarations and machine code don't change.
 
 ---
 
 ## 4. Quick start
+
+**Once per application:** reference the `EventFramework` library. It brings the `GenericEvents` event class and all the wiring with it.
 
 **1. Define the event** in `GVLs/GVL_EventTexts`:
 ```iecst
@@ -110,7 +112,7 @@ ConveyorJam : ST_EventDefinition := (nId := 203, eSeverity := TcEventSeverity.Er
 **2. Declare an alarm** where you need it:
 ```iecst
 VAR
-    fbJam : FB_CatalogAlarm(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.ConveyorJam);
+    fbJam : FB_CatalogAlarm(stDefinition := GVL_EventTexts.ConveyorJam);
 END_VAR
 ```
 
@@ -153,7 +155,7 @@ An alarm is an event that stays active until it is cleared.
 A message is a one-time event, such as "machine started" or a trace.
 
 ```iecst
-fbStarted : FB_CatalogMessage(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.MachineStarted);
+fbStarted : FB_CatalogMessage(stDefinition := GVL_EventTexts.MachineStarted);
 ...
 IF rtStart.Q THEN
     fbStarted.Arguments.Clear().AddString('Line 1').AddString('Operator');
@@ -169,6 +171,7 @@ END_IF
 | `Severity` | The severity from the definition. |
 | `LastResult` | HRESULT of the last event logger call. Use it for diagnostics. |
 | `SourceName` | Optional override of the source name. The default is the instance path. Only takes effect before the first raise or send. |
+| `Context` | The event services this event uses. The default is `GVL_EventDefaults.fbContext`. Set it to inject a different `I_EventContext` for this one event. Only takes effect before the first raise or send. |
 
 ### Arguments are taken over when the event is raised
 
@@ -193,7 +196,7 @@ Because of this, any number of instances can be active at the same time, even fo
 
 Each line in the text list holds one text per language, in the order of `E_Language`.
 
-**Adding a language:**
+**Adding a language** (steps 1 and 2 are in the library, so release a new library version):
 
 1. Add a value to `E_Language`:
    ```iecst
@@ -209,7 +212,7 @@ Each line in the text list holds one text per language, in the order of `E_Langu
 
 **Switching language at runtime:**
 ```iecst
-GVL_Events.fbLanguage.Current := E_Language.German;
+GVL_EventDefaults.fbLanguage.Current := E_Language.German;
 ```
 
 How the language rules work:
@@ -241,14 +244,15 @@ nId;Language;Text
 203;1;Förderband {0} blockiert bei {1} mm
 ```
 
-Turning it on changes only the composition root:
+Turning it on swaps one service in the default context:
 ```iecst
-// GVL_Events
-fbCsvTexts : FB_CsvTextProvider(ipFallback := fbDefinitionTexts);
-fbContext  : FB_EventContext(ipTexts := fbCsvTexts, ipLanguage := fbLanguage,
-                             ipFormatter := fbFormatter, ipEventEntries := fbEventClass);
+// an application GVL, e.g. GVL_App
+fbCsvTexts : FB_CsvTextProvider(ipFallback := GVL_EventDefaults.fbDefinitionTexts);
+
+// once at startup, before the first event is raised
+GVL_EventDefaults.fbContext.Texts := GVL_App.fbCsvTexts;
 ```
-Call `GVL_Events.fbCsvTexts()` every cycle so the file loading can make progress. Until the file has loaded, and for any id the file doesn't contain, the texts compiled into `GVL_EventTexts` are used. The machine keeps working even if the file is missing.
+Call `GVL_App.fbCsvTexts()` every cycle so the file loading can make progress. Until the file has loaded, and for any id the file doesn't contain, the texts compiled into `GVL_EventTexts` are used. The machine keeps working even if the file is missing.
 
 ---
 
@@ -304,44 +308,55 @@ Call `GVL_Events.fbCsvTexts()` every cycle so the file loading can make progress
 | **O**pen/closed | New events are data. New text sources, formatters or mappings are new blocks, and existing code doesn't change. |
 | **L**iskov substitution | Alarms and messages can be used anywhere an `I_CatalogEvent` is expected. Any `I_TextProvider` can replace another. |
 | **I**nterface segregation | Arguments have a write side (`I_ArgumentBuilder`) for application code and a read side (`I_ArgumentSource`) for the formatter. |
-| **D**ependency inversion | Events depend only on interfaces. `GVL_Events` is the one place that wires concrete blocks together. |
+| **D**ependency inversion | Events depend only on interfaces. `GVL_EventDefaults` is the one place that wires concrete blocks together, and applications override parts of it through `FB_EventContext`'s setters. |
 
 ---
 
 ## 9. Project structure
 
+The framework is a PLC library. The sample is a separate PLC project that references it.
+
 ```
-EventLoggerSample (PLC)
-├── EventFramework/                  reusable part, could become a library
-│   ├── GVL_EventFramework           constants: max arguments, language count, HRESULTs
-│   ├── DUTs/
-│   │   ├── E_Language
-│   │   └── ST_EventDefinition
-│   ├── Interfaces/
-│   │   ├── I_Alarm, I_Message, I_CatalogEvent
-│   │   ├── I_ArgumentBuilder, I_ArgumentSource
-│   │   ├── I_TextProvider, I_LanguageProvider, I_TextFormatter
-│   │   └── I_EventEntryProvider, I_EventContext
-│   └── POUs/
-│       ├── FB_CatalogEventBase      abstract base
-│       ├── FB_CatalogAlarm
-│       ├── FB_CatalogMessage
-│       ├── FB_EventArgs
-│       ├── FB_PlaceholderFormatter
-│       ├── FB_DefinitionTextProvider
-│       ├── FB_LanguageSelector
-│       ├── FB_GenericEventClass     maps severity → TC_EVENTS.GenericEvents.*
-│       └── FB_EventContext
+EventFramework (PLC library project – saved and installed as library "EventFramework")
+├── GenericEvents                    pinned event class (Verbose/Info/Warning/Error/Critical, text "{0}")
+├── GVL_EventDefaults                default composition root (texts, language, formatter, event class, context)
+├── GVL_EventFramework               constants: max arguments, language count, HRESULTs
+├── DUTs/
+│   ├── E_Language
+│   └── ST_EventDefinition
+├── Interfaces/
+│   ├── I_Alarm, I_Message, I_CatalogEvent
+│   ├── I_ArgumentBuilder, I_ArgumentSource
+│   ├── I_TextProvider, I_LanguageProvider, I_TextFormatter
+│   └── I_EventEntryProvider, I_EventContext
+└── POUs/
+    ├── FB_CatalogEventBase          abstract base
+    ├── FB_CatalogAlarm
+    ├── FB_CatalogMessage
+    ├── FB_EventArgs
+    ├── FB_PlaceholderFormatter
+    ├── FB_DefinitionTextProvider
+    ├── FB_LanguageSelector
+    ├── FB_GenericEventClass         I_EventEntryProvider: maps severity → TC_EVENTS.GenericEvents.*
+    └── FB_EventContext
+
+EventLoggerSample (PLC application – references the EventFramework library)
 ├── GVLs/
-│   ├── GVL_EventTexts               ← the text list: the only place to add events
-│   └── GVL_Events                   composition root (wiring)
+│   └── GVL_EventTexts               ← the text list: the only place to add events
 └── POUs/
     ├── FB_Motor                     example component with three alarms
     └── MAIN                         demo: two motors, a door alarm, messages
-
-System project (.tsproj)
-└── Type System → Event Classes → GenericEvents   (Verbose/Info/Warning/Error/Critical, text "{0}")
 ```
+
+The `GenericEvents` event class is pinned in the library (*Add → Global Data Type…*; on 4024 *External Types → Pin Global Data Type*). TwinCAT then adds it to the type system of every project that references the library, so `TC_EVENTS.GenericEvents.*` exists there without anyone editing the TMC. `FB_GenericEventClass` is the only block that names it.
+
+### Using the library in a project
+
+1. Open `EventFramework` and use *Save as library and install*. Raise `ProjectVersion` in the project properties for each release.
+2. In the application, add the `EventFramework` library reference (plus `Tc3_EventLogger`).
+3. Write your own `GVL_EventTexts` and declare `FB_CatalogAlarm(stDefinition := …)` / `FB_CatalogMessage(stDefinition := …)` where you need them.
+
+To map severities onto a different event class, write your own `I_EventEntryProvider` and set it at startup: `GVL_EventDefaults.fbContext.EventEntries := fbMyEventClass;`.
 
 ### Trying the demo
 
@@ -374,8 +389,8 @@ Go online and change the variables in `MAIN`:
 
 | Symptom | Cause and fix |
 |---|---|
-| `TC_EVENTS.GenericEvents` unknown at build | The event class is missing. Check *Type System → Event Classes* and make sure the names are `Verbose`, `Info`, `Warning`, `Error` and `Critical`. |
-| Nothing appears in the logger | Check `fbAlarm.LastResult`. `HR_NO_CONTEXT` (`16#80004003`) means `ipContext` wasn't passed in. |
+| `TC_EVENTS.GenericEvents` unknown at build | The event class is missing. It must be pinned in the library (*Add → Global Data Type…*) before the library is saved. In the type system, check that the event names are `Verbose`, `Info`, `Warning`, `Error` and `Critical`. |
+| Nothing appears in the logger | Check `fbAlarm.LastResult`. `HR_NO_CONTEXT` (`16#80004003`) means a custom context has no `I_EventEntryProvider` (`EventEntries` is empty). |
 | The text shows a raw `{2}` | The text uses a placeholder with no argument. Add the argument, or fix the text. |
 | A text appears in English despite a language switch | The translation is empty, or the alarm was raised before the switch. |
 | The alarm text doesn't update while raised | This is intentional. Arguments are taken over when the alarm is raised. Clear and raise again to refresh the text. |

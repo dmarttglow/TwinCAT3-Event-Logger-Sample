@@ -18,76 +18,7 @@
     <LibraryReferences>{9eef8195-73e0-41df-81f6-d70fbf1fcef0}</LibraryReferences>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="EventFramework\DUTs\E_Language.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EventFramework\DUTs\ST_EventDefinition.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EventFramework\GVL_EventFramework.TcGVL">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EventFramework\Interfaces\I_Alarm.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EventFramework\Interfaces\I_ArgumentBuilder.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EventFramework\Interfaces\I_ArgumentSource.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EventFramework\Interfaces\I_CatalogEvent.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EventFramework\Interfaces\I_EventContext.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EventFramework\Interfaces\I_EventEntryProvider.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EventFramework\Interfaces\I_LanguageProvider.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EventFramework\Interfaces\I_Message.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EventFramework\Interfaces\I_TextFormatter.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EventFramework\Interfaces\I_TextProvider.TcIO">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EventFramework\POUs\FB_CatalogAlarm.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EventFramework\POUs\FB_CatalogEventBase.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EventFramework\POUs\FB_CatalogMessage.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EventFramework\POUs\FB_DefinitionTextProvider.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EventFramework\POUs\FB_EventArgs.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EventFramework\POUs\FB_EventContext.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EventFramework\POUs\FB_GenericEventClass.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EventFramework\POUs\FB_LanguageSelector.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EventFramework\POUs\FB_PlaceholderFormatter.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="GVLs\GVL_EventTexts.TcGVL">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="GVLs\GVL_Events.TcGVL">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\FB_Motor.TcPOU">
@@ -105,12 +36,12 @@
     <Folder Include="GVLs" />
     <Folder Include="POUs" />
     <Folder Include="VISUs" />
-    <Folder Include="EventFramework" />
-    <Folder Include="EventFramework\DUTs" />
-    <Folder Include="EventFramework\Interfaces" />
-    <Folder Include="EventFramework\POUs" />
   </ItemGroup>
   <ItemGroup>
+    <PlaceholderReference Include="EventFramework">
+      <DefaultResolution>EventFramework, * (DM)</DefaultResolution>
+      <Namespace>EventFramework</Namespace>
+    </PlaceholderReference>
     <PlaceholderReference Include="Tc2_Standard">
       <DefaultResolution>Tc2_Standard, * (Beckhoff Automation GmbH)</DefaultResolution>
       <Namespace>Tc2_Standard</Namespace>

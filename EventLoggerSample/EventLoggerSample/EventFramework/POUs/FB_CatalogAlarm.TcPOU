@@ -2,7 +2,7 @@
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
   <POU Name="FB_CatalogAlarm" Id="{38815c93-2488-445f-a0ab-c69627dd2b87}" SpecialFunc="None">
     <Declaration><![CDATA[// Stateful alarm whose severity and text come from the event catalog.
-// Declare as:  fbX : FB_CatalogAlarm(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.X);
+// Declare as:  fbX : FB_CatalogAlarm(stDefinition := GVL_EventTexts.X);
 FUNCTION_BLOCK FB_CatalogAlarm EXTENDS FB_CatalogEventBase IMPLEMENTS I_Alarm
 VAR
 	_fbAlarm	: FB_TcAlarm;

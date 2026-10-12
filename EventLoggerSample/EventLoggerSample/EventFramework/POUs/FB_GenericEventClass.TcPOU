@@ -3,6 +3,9 @@
   <POU Name="FB_GenericEventClass" Id="{1f01cc0c-e057-455b-a004-f63681b05669}" SpecialFunc="None">
     <Declaration><![CDATA[// The ONLY place that knows the TMC event class "GenericEvents".
 // Each event in that class has the text "{0}", the full text is supplied as argument.
+// The class is pinned in this library (Add > Global Data Type), so it is added to the
+// type system of every project that references the library.
+// Used by GVL_EventDefaults.fbContext.
 FUNCTION_BLOCK FB_GenericEventClass IMPLEMENTS I_EventEntryProvider
 VAR
 END_VAR

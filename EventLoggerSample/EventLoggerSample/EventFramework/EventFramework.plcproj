@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <FileVersion>1.0.0.0</FileVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{3da8df9e-6f30-400b-86e8-9e13dd2f5a30}</ProjectGuid>
+    <SubObjectsSortedByName>true</SubObjectsSortedByName>
+    <DownloadApplicationInfo>true</DownloadApplicationInfo>
+    <WriteProductVersion>false</WriteProductVersion>
+    <GenerateTpy>false</GenerateTpy>
+    <Name>EventFramework</Name>
+    <ProgramVersion>3.1.4026.26</ProgramVersion>
+    <Application>{00793efe-1a6c-4ad5-ace4-78a74d0e8b49}</Application>
+    <TypeSystem>{14b52ef3-8b9e-4fce-81c8-1f646a905ba2}</TypeSystem>
+    <Implicit_Task_Info>{e258dbd5-4d63-46e9-a19c-78b5069f9e7c}</Implicit_Task_Info>
+    <Implicit_KindOfTask>{0579f4e3-b0f3-475d-a603-02ac8a75ff62}</Implicit_KindOfTask>
+    <Implicit_Jitter_Distribution>{c8400b02-7ab5-47e1-b337-b7578fcdcbf9}</Implicit_Jitter_Distribution>
+    <LibraryReferences>{26923280-859d-4fcb-b562-c11dd3a763ef}</LibraryReferences>
+    <Company>DM</Company>
+    <Title>EventFramework</Title>
+    <ProjectVersion>1.0.0.1</ProjectVersion>
+    <DefaultNamespace>EventFramework</DefaultNamespace>
+    <Placeholder>EventFramework</Placeholder>
+    <Description>Text-list driven alarms and messages on top of Tc3_EventLogger.</Description>
+    <Released>false</Released>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="DUTs\E_Language.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\ST_EventDefinition.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GVL_EventDefaults.TcGVL">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GVL_EventFramework.TcGVL">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\I_Alarm.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\I_ArgumentBuilder.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\I_ArgumentSource.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\I_CatalogEvent.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\I_EventContext.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\I_EventEntryProvider.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\I_LanguageProvider.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\I_Message.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\I_TextFormatter.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Interfaces\I_TextProvider.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\FB_CatalogAlarm.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\FB_CatalogEventBase.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\FB_CatalogMessage.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\FB_DefinitionTextProvider.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\FB_EventArgs.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\FB_EventContext.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\FB_GenericEventClass.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\FB_LanguageSelector.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\FB_PlaceholderFormatter.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DUTs" />
+    <Folder Include="Interfaces" />
+    <Folder Include="POUs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PlaceholderReference Include="Tc2_Standard">
+      <DefaultResolution>Tc2_Standard, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_Standard</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_System">
+      <DefaultResolution>Tc2_System, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_System</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc3_EventLogger">
+      <DefaultResolution>Tc3_EventLogger, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc3_EventLogger</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc3_Module">
+      <DefaultResolution>Tc3_Module, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc3_Module</Namespace>
+      <SystemLibrary>true</SystemLibrary>
+    </PlaceholderReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="EventFramework.tmc">
+      <SubType>Content</SubType>
+    </None>
+  </ItemGroup>
+  <ProjectExtensions />
+</Project>
