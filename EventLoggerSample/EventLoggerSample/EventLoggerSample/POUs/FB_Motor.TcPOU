@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <POU Name="FB_Motor" Id="{e819cd10-a84d-4059-aa08-2942e06c7e58}" SpecialFunc="None">
+    <Declaration><![CDATA[// Example machine component. Its alarms share TMC events with every other motor;
+// they can be active simultaneously because each alarm has its own source info.
+FUNCTION_BLOCK FB_Motor
+VAR_INPUT
+	sName			: STRING(40);
+	fTemperature	: LREAL;
+	fCurrent		: LREAL;
+END_VAR
+VAR
+	fbHighTemperature	: FB_CatalogAlarm(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.MotorHighTemperature);
+	fbOverTemperature	: FB_CatalogAlarm(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.MotorOverTemperature);
+	fbOverCurrent		: FB_CatalogAlarm(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.MotorOverCurrent);
+END_VAR
+VAR CONSTANT
+	cWarnTemperature	: LREAL := 70.0;
+	cMaxTemperature		: LREAL := 85.0;
+	cMaxCurrent			: LREAL := 12.0;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Arguments are refreshed every cycle but only taken over when the alarm is raised.
+fbHighTemperature.Arguments.Clear().AddString(sName).AddLReal(fTemperature, 1).AddLReal(cWarnTemperature, 0);
+fbHighTemperature.SetActive(fTemperature > cWarnTemperature AND fTemperature <= cMaxTemperature);
+
+fbOverTemperature.Arguments.Clear().AddString(sName).AddLReal(fTemperature, 1).AddLReal(cMaxTemperature, 0);
+fbOverTemperature.SetActive(fTemperature > cMaxTemperature);
+
+fbOverCurrent.Arguments.Clear().AddString(sName).AddLReal(fCurrent, 2).AddLReal(cMaxCurrent, 1);
+fbOverCurrent.SetActive(fCurrent > cMaxCurrent);
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

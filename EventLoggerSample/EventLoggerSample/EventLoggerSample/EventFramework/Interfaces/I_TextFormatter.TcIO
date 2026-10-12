@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <Itf Name="I_TextFormatter" Id="{56f841f6-e340-4f83-8da9-12553417a3cb}">
+    <Declaration><![CDATA[// Renders a text template with arguments.
+INTERFACE I_TextFormatter
+]]></Declaration>
+    <Method Name="Format" Id="{5354f80d-2c5a-4b5a-ad59-c15cef258599}">
+      <Declaration><![CDATA[METHOD Format : T_MaxString
+VAR_INPUT
+	ipArguments	: I_ArgumentSource;
+END_VAR
+VAR_IN_OUT CONSTANT
+	sTemplate	: T_MaxString;
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

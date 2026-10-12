@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <POU Name="FB_EventArgs" Id="{9557b18b-aeea-4a94-882b-d4ef219de25c}" SpecialFunc="None">
+    <Declaration><![CDATA[// Argument container. Values are stored as text, ready for the formatter.
+FUNCTION_BLOCK FB_EventArgs IMPLEMENTS I_ArgumentBuilder, I_ArgumentSource
+VAR
+	aValues	: ARRAY[0..GVL_EventFramework.cMaxArguments - 1] OF T_MaxString;
+	nCount	: USINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Append" Id="{5822f03d-3d66-4104-8b26-0bce187fbd25}">
+      <Declaration><![CDATA[METHOD PRIVATE Append : I_ArgumentBuilder
+VAR_INPUT
+	sValue	: T_MaxString;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF nCount < GVL_EventFramework.cMaxArguments THEN
+	aValues[nCount] := sValue;
+	nCount := nCount + 1;
+END_IF
+Append := THIS^;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Clear" Id="{fa4bebbe-5a70-49b5-ae94-66d822ae4a95}">
+      <Declaration><![CDATA[METHOD Clear : I_ArgumentBuilder
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[nCount := 0;
+Clear := THIS^;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AddString" Id="{6321ec74-47a3-4560-8567-62c49383d67a}">
+      <Declaration><![CDATA[METHOD AddString : I_ArgumentBuilder
+VAR_INPUT
+	sValue	: T_MaxString;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AddString := Append(sValue);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AddDInt" Id="{aab139e2-707b-432c-82bb-de1b60a37026}">
+      <Declaration><![CDATA[METHOD AddDInt : I_ArgumentBuilder
+VAR_INPUT
+	nValue	: DINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[AddDInt := Append(DINT_TO_STRING(nValue));
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AddLReal" Id="{eb8b8006-a215-4b79-bc9b-c1a52446d4b6}">
+      <Declaration><![CDATA[METHOD AddLReal : I_ArgumentBuilder
+VAR_INPUT
+	fValue		: LREAL;
+	nDecimals	: USINT;	// 0..9
+END_VAR
+VAR
+	nDigits	: USINT;
+	nScale	: LINT := 1;
+	nScaled	: LINT;
+	i		: USINT;
+	sFrac	: STRING(20);
+	sValue	: T_MaxString;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[nDigits := MIN(nDecimals, 9);
+FOR i := 1 TO nDigits DO
+	nScale := nScale * 10;
+END_FOR
+
+// Fixed-point formatting avoids LREAL_TO_STRING artefacts like 82.350000000000009
+nScaled := LREAL_TO_LINT(ABS(fValue) * LINT_TO_LREAL(nScale));
+sValue := LINT_TO_STRING(nScaled / nScale);
+IF nDigits > 0 THEN
+	sFrac := LINT_TO_STRING(nScaled MOD nScale);
+	WHILE LEN(sFrac) < nDigits DO
+		sFrac := CONCAT('0', sFrac);
+	END_WHILE
+	sValue := CONCAT(CONCAT(sValue, '.'), sFrac);
+END_IF
+IF fValue < 0 AND nScaled <> 0 THEN
+	sValue := CONCAT('-', sValue);
+END_IF
+
+AddLReal := Append(sValue);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AddBool" Id="{50546d3a-aa62-4e4a-804b-496d49daa64c}">
+      <Declaration><![CDATA[METHOD AddBool : I_ArgumentBuilder
+VAR_INPUT
+	bValue	: BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF bValue THEN
+	AddBool := Append('TRUE');
+ELSE
+	AddBool := Append('FALSE');
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetArgument" Id="{e47617db-6390-44ce-92d7-49cfe754980a}">
+      <Declaration><![CDATA[METHOD GetArgument : T_MaxString
+VAR_INPUT
+	nIndex	: USINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF nIndex < nCount THEN
+	GetArgument := aValues[nIndex];
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Count" Id="{5e716aa1-3895-4f9a-b599-bb2637a2593e}">
+      <Declaration><![CDATA[PROPERTY Count : USINT]]></Declaration>
+      <Get Name="Get" Id="{0e5c7045-84fd-4ab3-8181-21fc4f575266}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Count := nCount;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+  </POU>
+</TcPlcObject>

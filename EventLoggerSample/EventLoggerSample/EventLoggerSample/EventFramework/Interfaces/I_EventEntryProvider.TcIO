@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <Itf Name="I_EventEntryProvider" Id="{7e757470-ce7b-413d-8f35-d886c49b9f56}">
+    <Declaration><![CDATA[// Maps a severity onto a TMC event (event class + event id).
+INTERFACE I_EventEntryProvider
+]]></Declaration>
+    <Method Name="GetEventEntry" Id="{c70d9519-63eb-4c3c-bad5-e30305ce9996}">
+      <Declaration><![CDATA[METHOD GetEventEntry : TcEventEntry
+VAR_INPUT
+	eSeverity	: TcEventSeverity;
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

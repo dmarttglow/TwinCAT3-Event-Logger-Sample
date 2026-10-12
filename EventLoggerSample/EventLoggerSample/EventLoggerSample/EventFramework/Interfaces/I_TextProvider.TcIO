@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <Itf Name="I_TextProvider" Id="{c0ec782c-9139-4119-aaf9-dbf8516dc345}">
+    <Declaration><![CDATA[// Supplies the text template of an event in a language.
+// Default: FB_DefinitionTextProvider (texts from GVL_EventTexts).
+// Extension point: e.g. a CSV provider that overrides texts and delegates to the default.
+INTERFACE I_TextProvider
+]]></Declaration>
+    <Method Name="GetTemplate" Id="{7e11a230-415e-4414-8ac7-816d11049092}">
+      <Declaration><![CDATA[METHOD GetTemplate : T_MaxString
+VAR_INPUT
+	eLanguage		: E_Language;
+END_VAR
+VAR_IN_OUT CONSTANT
+	stDefinition	: ST_EventDefinition;
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

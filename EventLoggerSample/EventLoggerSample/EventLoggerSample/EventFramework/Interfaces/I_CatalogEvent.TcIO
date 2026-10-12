@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <Itf Name="I_CatalogEvent" Id="{ecbf0128-e578-407b-9065-9e0b8dda54a4}">
+    <Declaration><![CDATA[// Common part of catalog alarms and messages.
+INTERFACE I_CatalogEvent
+]]></Declaration>
+    <Property Name="Arguments" Id="{dfac73f4-e1e7-4f41-bea0-76fb726d7ee9}">
+      <Declaration><![CDATA[PROPERTY Arguments : I_ArgumentBuilder
+]]></Declaration>
+      <Get Name="Get" Id="{1d362b96-2755-44c5-af99-faa5daa4ee0e}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Severity" Id="{79a4b9a6-24e2-42c9-8f58-59cebe64b57d}">
+      <Declaration><![CDATA[PROPERTY Severity : TcEventSeverity
+]]></Declaration>
+      <Get Name="Get" Id="{c28f00d7-06a8-4080-b533-d2f64f2bc7b6}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="LastResult" Id="{8a16e2e3-0488-4c34-81a4-8fdefc5af7ac}">
+      <Declaration><![CDATA[PROPERTY LastResult : HRESULT
+]]></Declaration>
+      <Get Name="Get" Id="{65dd371c-a6ca-4be0-92fa-11b77ba3a6ea}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="SourceName" Id="{c8a97ec5-4e4d-42df-a292-6bbde6abcf9b}">
+      <Declaration><![CDATA[PROPERTY SourceName : T_MaxString
+]]></Declaration>
+      <Get Name="Get" Id="{86395133-2cd1-4f65-b3c7-4efa6a54af9d}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+      <Set Name="Set" Id="{1958da8b-7472-4cad-9714-7c8905e0612a}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Set>
+    </Property>
+  </Itf>
+</TcPlcObject>

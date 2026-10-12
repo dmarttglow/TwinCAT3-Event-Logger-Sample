@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <Itf Name="I_Message" Id="{93f0d335-f913-4849-8ca7-510ba6ea7fe4}">
+    <Declaration><![CDATA[INTERFACE I_Message EXTENDS I_CatalogEvent
+]]></Declaration>
+    <Method Name="Send" Id="{7abe0bd7-d420-47c1-99b2-a35bd7343479}">
+      <Declaration><![CDATA[METHOD Send : HRESULT
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

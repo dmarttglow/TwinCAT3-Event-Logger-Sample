@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <GVL Name="GVL_Events" Id="{577dec5c-26b9-40f4-9946-816e9935647c}">
+    <Declaration><![CDATA[// Composition root: wires the event framework together once.
+// Swap any part here without touching alarms or machine code, e.g. for CSV texts:
+//   fbCsvTexts : FB_CsvTextProvider(ipFallback := fbDefinitionTexts);
+//   fbContext  : FB_EventContext(ipTexts := fbCsvTexts, ...);
+VAR_GLOBAL
+	fbDefinitionTexts	: FB_DefinitionTextProvider;
+	fbLanguage			: FB_LanguageSelector;
+	fbFormatter			: FB_PlaceholderFormatter;
+	fbEventClass		: FB_GenericEventClass;
+	fbContext			: FB_EventContext(ipTexts := fbDefinitionTexts,
+										  ipLanguage := fbLanguage,
+										  ipFormatter := fbFormatter,
+										  ipEventEntries := fbEventClass);
+END_VAR
+]]></Declaration>
+  </GVL>
+</TcPlcObject>

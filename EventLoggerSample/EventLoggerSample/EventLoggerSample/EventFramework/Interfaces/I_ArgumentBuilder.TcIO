@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <Itf Name="I_ArgumentBuilder" Id="{d52b9beb-7686-498a-a88a-3417ce4241a2}">
+    <Declaration><![CDATA[// Write side of the event arguments (fluent).
+INTERFACE I_ArgumentBuilder
+]]></Declaration>
+    <Method Name="Clear" Id="{848a4de6-37d9-4af5-b1a2-bd4db72c0174}">
+      <Declaration><![CDATA[METHOD Clear : I_ArgumentBuilder
+]]></Declaration>
+    </Method>
+    <Method Name="AddString" Id="{7c0d1f56-2379-44ec-a329-b22872f15186}">
+      <Declaration><![CDATA[METHOD AddString : I_ArgumentBuilder
+VAR_INPUT
+	sValue	: T_MaxString;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="AddDInt" Id="{f77aedb4-6505-4ac4-bd30-df492b671162}">
+      <Declaration><![CDATA[METHOD AddDInt : I_ArgumentBuilder
+VAR_INPUT
+	nValue	: DINT;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="AddLReal" Id="{56cc5461-1c86-41e5-85ed-5397c50dbbae}">
+      <Declaration><![CDATA[METHOD AddLReal : I_ArgumentBuilder
+VAR_INPUT
+	fValue		: LREAL;
+	nDecimals	: USINT;	// 0..9
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="AddBool" Id="{8a1ef3ea-8ff8-4869-9086-92a82127a31c}">
+      <Declaration><![CDATA[METHOD AddBool : I_ArgumentBuilder
+VAR_INPUT
+	bValue	: BOOL;
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

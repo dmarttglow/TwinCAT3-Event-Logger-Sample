@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <POU Name="FB_CatalogEventBase" Id="{975b658a-92ab-4a72-9d39-26989902baf8}" SpecialFunc="None">
+    <Declaration><![CDATA[// Shared behaviour of catalog alarms and messages:
+//  - gets its definition (severity, confirmation, texts) from GVL_EventTexts at declaration
+//  - owns a unique source info (default name = instance path, nId = definition nId),
+//    so any number of catalog events can be active at the same time even when
+//    they map onto the same generic TMC event
+//  - gets the text in the current language and renders it with the injected formatter
+// Derived blocks only create/drive their concrete Tc3_EventLogger object.
+{attribute 'reflection'}
+FUNCTION_BLOCK ABSTRACT FB_CatalogEventBase IMPLEMENTS I_CatalogEvent
+VAR
+	{attribute 'instance-path'}
+	{attribute 'noinit'}
+	_sInstancePath	: T_MaxString;
+END_VAR
+VAR
+	_ipContext		: I_EventContext;
+	_stDefinition	: ST_EventDefinition;
+	_fbSourceInfo	: FB_TcSourceInfo;
+	_fbArguments	: FB_EventArgs;
+	_sSourceName	: T_MaxString;
+	_bCreated		: BOOL;
+	_hrLast			: HRESULT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="FB_init" Id="{0ec5806f-92ad-46ef-88b1-b17ca356086b}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains	: BOOL;
+	bInCopyCode		: BOOL;
+	ipContext		: I_EventContext;
+	stDefinition	: ST_EventDefinition;	// e.g. GVL_EventTexts.ConveyorJam
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_ipContext := ipContext;
+_stDefinition := stDefinition;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="EnsureCreated" Id="{6880544d-2b70-419c-8c2e-de1a96d0cefa}">
+      <Declaration><![CDATA[// Lazily creates the event logger object on first use.
+METHOD PROTECTED EnsureCreated : BOOL
+VAR
+	ipEntries	: I_EventEntryProvider;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF _bCreated THEN
+	EnsureCreated := TRUE;
+	RETURN;
+END_IF
+
+IF _ipContext = 0 THEN
+	_hrLast := GVL_EventFramework.HR_NO_CONTEXT;
+	RETURN;
+END_IF
+
+ipEntries := _ipContext.EventEntries;
+IF ipEntries = 0 THEN
+	_hrLast := GVL_EventFramework.HR_NO_CONTEXT;
+	RETURN;
+END_IF
+
+// Unique source info per instance => simultaneous events never collide
+IF _sSourceName = '' THEN
+	_sSourceName := _sInstancePath;
+END_IF
+_fbSourceInfo.sName := _sSourceName;
+_fbSourceInfo.nId := _stDefinition.nId;
+
+_hrLast := CreateEvent(stEventEntry := ipEntries.GetEventEntry(_stDefinition.eSeverity),
+					   ipSourceInfo := _fbSourceInfo);
+_bCreated := SUCCEEDED(_hrLast);
+EnsureCreated := _bCreated;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="CreateEvent" Id="{1836887d-eef3-47a7-891d-8ec8d5f0d1e8}">
+      <Declaration><![CDATA[// Template method: derived blocks create their FB_TcAlarm / FB_TcMessage here.
+METHOD PROTECTED CreateEvent : HRESULT
+VAR_INPUT
+	stEventEntry	: TcEventEntry;
+	ipSourceInfo	: I_TcSourceInfo;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CreateEvent := GVL_EventFramework.HR_NOT_IMPLEMENTED;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="BuildText" Id="{af17d5d2-47f5-4818-ab08-a4449d2136bd}">
+      <Declaration><![CDATA[// Template in the current language, placeholders replaced by the arguments.
+METHOD PROTECTED BuildText : T_MaxString
+VAR
+	ipTexts		: I_TextProvider;
+	ipLanguage	: I_LanguageProvider;
+	ipFormatter	: I_TextFormatter;
+	eLanguage	: E_Language;
+	sTemplate	: T_MaxString;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ipTexts := _ipContext.Texts;
+ipLanguage := _ipContext.Language;
+ipFormatter := _ipContext.Formatter;
+
+IF ipLanguage <> 0 THEN
+	eLanguage := ipLanguage.Current;
+END_IF
+
+IF ipTexts <> 0 THEN
+	sTemplate := ipTexts.GetTemplate(eLanguage := eLanguage, stDefinition := _stDefinition);
+ELSE
+	sTemplate := _stDefinition.asText[0];
+END_IF
+IF sTemplate = '' THEN
+	sTemplate := CONCAT('Event ', UDINT_TO_STRING(_stDefinition.nId));
+END_IF
+
+IF ipFormatter <> 0 THEN
+	BuildText := ipFormatter.Format(ipArguments := _fbArguments, sTemplate := sTemplate);
+ELSE
+	BuildText := sTemplate;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Arguments" Id="{263d1ee8-141c-4911-aba3-34012c75d33e}">
+      <Declaration><![CDATA[// Arguments are taken over when the event is raised/sent.
+PROPERTY Arguments : I_ArgumentBuilder]]></Declaration>
+      <Get Name="Get" Id="{8cbcf4d8-c212-49e0-a3e8-336b88ec7696}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Arguments := _fbArguments;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Severity" Id="{d5f818c9-5737-4f12-8d38-d6fac10ef447}">
+      <Declaration><![CDATA[PROPERTY Severity : TcEventSeverity]]></Declaration>
+      <Get Name="Get" Id="{63000776-c7da-49ce-9750-bf2926f4b943}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Severity := _stDefinition.eSeverity;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="LastResult" Id="{11f06e68-63fb-49ae-8636-54e45e6973ee}">
+      <Declaration><![CDATA[PROPERTY LastResult : HRESULT]]></Declaration>
+      <Get Name="Get" Id="{95abf98c-7c70-48c2-9ac7-42663ec553e6}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[LastResult := _hrLast;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="SourceName" Id="{03cba41d-a8a3-4867-83e2-78b088bd5db3}">
+      <Declaration><![CDATA[// Optional override of the source name (default: instance path).
+// Only effective before the first Raise/Send.
+PROPERTY SourceName : T_MaxString]]></Declaration>
+      <Get Name="Get" Id="{a4e04a89-c146-4c09-a904-32341151091f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[SourceName := _sSourceName;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{e6eeb587-e8f2-4a4f-9108-7cc0e475bad3}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IF NOT _bCreated THEN
+	_sSourceName := SourceName;
+END_IF
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+  </POU>
+</TcPlcObject>

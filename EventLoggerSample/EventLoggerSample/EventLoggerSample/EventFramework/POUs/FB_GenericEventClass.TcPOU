@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <POU Name="FB_GenericEventClass" Id="{1f01cc0c-e057-455b-a004-f63681b05669}" SpecialFunc="None">
+    <Declaration><![CDATA[// The ONLY place that knows the TMC event class "GenericEvents".
+// Each event in that class has the text "{0}", the full text is supplied as argument.
+FUNCTION_BLOCK FB_GenericEventClass IMPLEMENTS I_EventEntryProvider
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="GetEventEntry" Id="{5e31514b-d180-4948-8c92-03dc1d8cb51e}">
+      <Declaration><![CDATA[METHOD GetEventEntry : TcEventEntry
+VAR_INPUT
+	eSeverity	: TcEventSeverity;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE eSeverity OF
+	TcEventSeverity.Verbose:	GetEventEntry := TC_EVENTS.GenericEvents.Verbose;
+	TcEventSeverity.Info:		GetEventEntry := TC_EVENTS.GenericEvents.Info;
+	TcEventSeverity.Warning:	GetEventEntry := TC_EVENTS.GenericEvents.Warning;
+	TcEventSeverity.Error:		GetEventEntry := TC_EVENTS.GenericEvents.Error;
+	TcEventSeverity.Critical:	GetEventEntry := TC_EVENTS.GenericEvents.Critical;
+ELSE
+	GetEventEntry := TC_EVENTS.GenericEvents.Error;
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

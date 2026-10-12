@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <DUT Name="E_Language" Id="{beddf634-b330-4d55-a529-76b56c1dced3}">
+    <Declaration><![CDATA[// Languages of the event texts. The first value is the default/fallback language.
+// Adding one: add a value here, raise GVL_EventFramework.cLanguageCount,
+// then add the translation to the lines in GVL_EventTexts (missing ones fall back to the default).
+{attribute 'qualified_only'}
+TYPE E_Language :
+(
+	English := 0,
+	German	:= 1
+) USINT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

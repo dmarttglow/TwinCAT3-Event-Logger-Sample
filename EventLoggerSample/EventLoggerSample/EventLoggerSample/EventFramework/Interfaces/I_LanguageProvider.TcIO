@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <Itf Name="I_LanguageProvider" Id="{2d129caa-51c4-4106-a1db-be6b4dfcc74e}">
+    <Declaration><![CDATA[// Current language of the event texts.
+INTERFACE I_LanguageProvider
+]]></Declaration>
+    <Property Name="Current" Id="{62175160-0d42-4ab2-b8e7-0f8ae29f5978}">
+      <Declaration><![CDATA[PROPERTY Current : E_Language
+]]></Declaration>
+      <Get Name="Get" Id="{6edbf9ee-113b-46a8-b495-0296f87a9f11}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+  </Itf>
+</TcPlcObject>

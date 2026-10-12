@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <POU Name="FB_DefinitionTextProvider" Id="{b8acb06a-ead8-4e56-9b36-a6ad4cde2a87}" SpecialFunc="None">
+    <Declaration><![CDATA[// Default I_TextProvider: takes the text from the definition itself (GVL_EventTexts).
+// Falls back to the default language (index 0) when a translation is missing.
+FUNCTION_BLOCK FB_DefinitionTextProvider IMPLEMENTS I_TextProvider
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="GetTemplate" Id="{840fcb91-14eb-489f-9896-c52770ae1f09}">
+      <Declaration><![CDATA[METHOD GetTemplate : T_MaxString
+VAR_INPUT
+	eLanguage		: E_Language;
+END_VAR
+VAR_IN_OUT CONSTANT
+	stDefinition	: ST_EventDefinition;
+END_VAR
+VAR
+	nIndex	: USINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[nIndex := eLanguage;
+IF nIndex < GVL_EventFramework.cLanguageCount AND_THEN LEN(stDefinition.asText[nIndex]) > 0 THEN
+	GetTemplate := stDefinition.asText[nIndex];
+ELSE
+	GetTemplate := stDefinition.asText[0];
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

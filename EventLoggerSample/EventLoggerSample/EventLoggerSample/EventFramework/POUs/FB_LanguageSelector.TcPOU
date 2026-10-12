@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <POU Name="FB_LanguageSelector" Id="{dc23c4d7-7f19-41f1-93dd-bacb50ee63bc}" SpecialFunc="None">
+    <Declaration><![CDATA[// Holds the current event text language. Affects events raised after the change.
+FUNCTION_BLOCK FB_LanguageSelector IMPLEMENTS I_LanguageProvider
+VAR
+	_eCurrent	: E_Language;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="Current" Id="{88b1b168-745b-43f6-bb03-d98613d27ddd}">
+      <Declaration><![CDATA[PROPERTY Current : E_Language]]></Declaration>
+      <Get Name="Get" Id="{b7ef56a0-5d19-4ed4-9864-a06623f49025}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Current := _eCurrent;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{5d5df3c1-e095-4ba1-8eea-9e20daa606fc}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_eCurrent := Current;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+  </POU>
+</TcPlcObject>

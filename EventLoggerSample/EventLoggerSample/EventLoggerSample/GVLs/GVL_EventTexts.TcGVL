@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <GVL Name="GVL_EventTexts" Id="{abaa173c-5295-42c7-81e2-bec8713749c9}">
+    <Declaration><![CDATA[// The event text list - the ONLY place to edit when adding an event. The TMC never changes.
+//   nId       unique, stable number (source info id, HMI filter, key for external/CSV texts)
+//   asText    one text per E_Language; {0}..{9} are replaced by the arguments
+{attribute 'qualified_only'}
+VAR_GLOBAL CONSTANT
+	MachineStarted			: ST_EventDefinition := (nId := 100, eSeverity := TcEventSeverity.Info,		asText := ['Machine {0} started by {1}']);
+	MachineStopped			: ST_EventDefinition := (nId := 101, eSeverity := TcEventSeverity.Info,		asText := ['Machine {0} stopped']);
+	MotorHighTemperature	: ST_EventDefinition := (nId := 200, eSeverity := TcEventSeverity.Warning,	asText := ['Motor {0}: temperature high ({1} degC, limit {2} degC)']);
+	MotorOverTemperature : ST_EventDefinition := (nId := 201, eSeverity := TcEventSeverity.Error,
+							asText := ['Motor {0}: over temperature ({1} degC, limit {2} degC)',      // English
+									   'Motor {0}: Übertemperatur ({1} °C, Grenze {2} °C)']);         // German
+	MotorOverCurrent		: ST_EventDefinition := (nId := 202, eSeverity := TcEventSeverity.Error,	asText := ['Motor {0}: over current ({1} A, limit {2} A)']);
+	DoorOpen				: ST_EventDefinition := (nId := 300, eSeverity := TcEventSeverity.Critical,	bWithConfirmation := TRUE, asText := ['Safety door {0} open']);
+	DebugTrace				: ST_EventDefinition := (nId := 900, eSeverity := TcEventSeverity.Verbose,	asText := ['Trace: {0}']);
+END_VAR
+]]></Declaration>
+  </GVL>
+</TcPlcObject>

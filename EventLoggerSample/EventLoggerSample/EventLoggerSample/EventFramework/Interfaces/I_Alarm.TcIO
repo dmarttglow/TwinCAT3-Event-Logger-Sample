@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <Itf Name="I_Alarm" Id="{4bfdbc82-0539-4d6a-8ea5-737cf605239b}">
+    <Declaration><![CDATA[INTERFACE I_Alarm EXTENDS I_CatalogEvent
+]]></Declaration>
+    <Method Name="Raise" Id="{e5a91d98-6862-4ddd-9c37-2efdb32df127}">
+      <Declaration><![CDATA[METHOD Raise : HRESULT
+]]></Declaration>
+    </Method>
+    <Method Name="Clear" Id="{a0763371-6747-44f4-8bf6-354d8f22101a}">
+      <Declaration><![CDATA[METHOD Clear : HRESULT
+VAR_INPUT
+	bResetConfirmation	: BOOL;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="Confirm" Id="{d613ac01-ac15-48ad-b6bc-a4a568bb8915}">
+      <Declaration><![CDATA[METHOD Confirm : HRESULT
+]]></Declaration>
+    </Method>
+    <Method Name="SetActive" Id="{477af543-31aa-4bf3-9506-0c6d4601fa71}">
+      <Declaration><![CDATA[// Level driven: raises while bActive is TRUE, clears when it drops.
+METHOD SetActive : HRESULT
+VAR_INPUT
+	bActive	: BOOL;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="IsRaised" Id="{28937878-11ef-4f0b-abe0-0f149e093da2}">
+      <Declaration><![CDATA[PROPERTY IsRaised : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{ccf2ba70-be33-4889-bdcc-62561fd267ea}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="ConfirmationState" Id="{15f50921-164f-4c46-8eee-5b06bdd1353d}">
+      <Declaration><![CDATA[PROPERTY ConfirmationState : TcEventConfirmationState
+]]></Declaration>
+      <Get Name="Get" Id="{bcc5249d-e193-4429-8bd5-3eeb0c193189}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+  </Itf>
+</TcPlcObject>

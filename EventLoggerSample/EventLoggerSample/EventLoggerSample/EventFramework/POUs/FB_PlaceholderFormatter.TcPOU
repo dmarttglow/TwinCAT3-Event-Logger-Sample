@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <POU Name="FB_PlaceholderFormatter" Id="{e08f85ee-5dca-4652-ae7e-d6940252d13a}" SpecialFunc="None">
+    <Declaration><![CDATA[// Replaces {0}..{9} in a template with the matching argument.
+// Placeholders without an argument are left in the text so they are easy to spot.
+FUNCTION_BLOCK FB_PlaceholderFormatter IMPLEMENTS I_TextFormatter
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Format" Id="{c2c0db60-d655-4cb4-9ec2-8aed3e91f7a0}">
+      <Declaration><![CDATA[METHOD Format : T_MaxString
+VAR_INPUT
+	ipArguments	: I_ArgumentSource;
+END_VAR
+VAR_IN_OUT CONSTANT
+	sTemplate	: T_MaxString;
+END_VAR
+VAR
+	sResult			: T_MaxString;
+	sArgument		: T_MaxString;
+	nLen			: INT;
+	nIn				: INT;
+	nOut			: INT;
+	nArg			: INT;
+	nArgLen			: INT;
+	nIndex			: USINT;
+	bPlaceholder	: BOOL;
+END_VAR
+VAR CONSTANT
+	cOpen		: BYTE := 16#7B;	// {
+	cClose		: BYTE := 16#7D;	// }
+	cZero		: BYTE := 16#30;	// 0
+	cNine		: BYTE := 16#39;	// 9
+	cMaxLen		: INT := 255;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[nLen := LEN(sTemplate);
+
+WHILE nIn < nLen AND nOut < cMaxLen DO
+	bPlaceholder := FALSE;
+	IF nIn + 2 < nLen
+		AND_THEN sTemplate[nIn] = cOpen
+		AND_THEN sTemplate[nIn + 1] >= cZero
+		AND_THEN sTemplate[nIn + 1] <= cNine
+		AND_THEN sTemplate[nIn + 2] = cClose
+		AND_THEN ipArguments <> 0
+	THEN
+		nIndex := BYTE_TO_USINT(sTemplate[nIn + 1] - cZero);
+		bPlaceholder := nIndex < ipArguments.Count;
+	END_IF
+
+	IF bPlaceholder THEN
+		sArgument := ipArguments.GetArgument(nIndex);
+		nArgLen := LEN(sArgument);
+		nArg := 0;
+		WHILE nArg < nArgLen AND nOut < cMaxLen DO
+			sResult[nOut] := sArgument[nArg];
+			nOut := nOut + 1;
+			nArg := nArg + 1;
+		END_WHILE
+		nIn := nIn + 3;
+	ELSE
+		sResult[nOut] := sTemplate[nIn];
+		nOut := nOut + 1;
+		nIn := nIn + 1;
+	END_IF
+END_WHILE
+
+sResult[nOut] := 0;
+Format := sResult;
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

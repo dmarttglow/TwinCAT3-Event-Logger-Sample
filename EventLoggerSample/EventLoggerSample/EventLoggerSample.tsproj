@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4026.26">
+	<DataTypes>
+		<DataType>
+			<Name GUID="{913F813B-1EE5-41E6-AB82-F8B262124BA6}" PersistentType="true">GenericEvents</Name>
+			<DisplayName TxtId=""><![CDATA[{0}]]></DisplayName>
+			<EventId>
+				<Name Id="1">Verbose</Name>
+				<DisplayName TxtId=""><![CDATA[{0}]]></DisplayName>
+				<Severity>Verbose</Severity>
+			</EventId>
+			<EventId>
+				<Name Id="2">Warning</Name>
+				<DisplayName TxtId=""><![CDATA[{0}]]></DisplayName>
+				<Severity>Warning</Severity>
+			</EventId>
+			<EventId>
+				<Name Id="3">Error</Name>
+				<DisplayName TxtId=""><![CDATA[{0}]]></DisplayName>
+				<Severity>Error</Severity>
+			</EventId>
+			<EventId>
+				<Name Id="4">Critical</Name>
+				<DisplayName TxtId=""><![CDATA[{0}]]></DisplayName>
+				<Severity>Critical</Severity>
+			</EventId>
+			<EventId>
+				<Name Id="5">Info</Name>
+				<DisplayName TxtId=""><![CDATA[{0}]]></DisplayName>
+				<Severity>Info</Severity>
+			</EventId>
+			<Hides>
+				<Hide GUID="{ECE21539-646B-4118-9237-0F91D8C7468E}"/>
+				<Hide GUID="{FB872F85-E246-4ED3-AE6B-DF6E119EFEF9}"/>
+				<Hide GUID="{5AE2BCB3-ABA8-46C9-B894-39235936BBA1}"/>
+				<Hide GUID="{685DDC92-E936-4802-81B3-D7636FF80F77}"/>
+				<Hide GUID="{B0458D14-3FAF-4531-B70A-B2AAE34B97D5}"/>
+			</Hides>
+		</DataType>
+	</DataTypes>
+	<Project ProjectGUID="{0FC58FA7-A270-42CE-875D-430A987111DA}" TargetNetId="199.4.42.250.1.1" Target64Bit="true" ShowHideConfigurations="#x6">
+		<System>
+			<Tasks>
+				<Task Id="3" Priority="20" CycleTime="100000" AmsPort="350" AdtTasks="true">
+					<Name>PlcTask</Name>
+				</Task>
+			</Tasks>
+		</System>
+		<Plc>
+			<Project GUID="{EA22082E-84E5-4C2F-BB70-F26FC7FF8DFF}" Name="EventLoggerSample" PrjFilePath="EventLoggerSample\EventLoggerSample.plcproj" TmcFilePath="EventLoggerSample\EventLoggerSample.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{1931FFFF-C319-0559-E184-1E42B6357461}" TmcPath="EventLoggerSample\EventLoggerSample.tmc">
+					<Name>EventLoggerSample Instance</Name>
+					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
+					<Contexts>
+						<Context>
+							<Id>0</Id>
+							<Name>PlcTask</Name>
+							<ManualConfig>
+								<OTCID>#x02010030</OTCID>
+							</ManualConfig>
+							<Priority>20</Priority>
+							<CycleTime>10000000</CycleTime>
+						</Context>
+					</Contexts>
+					<JsonDynPous><![CDATA[null]]></JsonDynPous>
+					<TaskPouOids>
+						<TaskPouOid Prio="20" OTCID="#x08502001"/>
+					</TaskPouOids>
+				</Instance>
+			</Project>
+		</Plc>
+	</Project>
+</TcSmProject>

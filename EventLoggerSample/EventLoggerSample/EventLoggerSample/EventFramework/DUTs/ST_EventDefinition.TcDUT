@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <DUT Name="ST_EventDefinition" Id="{6616fba5-4bfe-4a21-93cc-bc87c156b71c}">
+    <Declaration><![CDATA[// One event of the text list (see GVL_EventTexts).
+TYPE ST_EventDefinition :
+STRUCT
+	nId					: UDINT;			// stable key: source info nId, HMI filtering, external (CSV) texts
+	eSeverity			: TcEventSeverity;	// selects the generic TMC event (Verbose/Info/Warning/Error/Critical)
+	bWithConfirmation	: BOOL;				// alarms only: operator has to confirm
+	asText				: ARRAY[0..GVL_EventFramework.cLanguageCount - 1] OF STRING(160);	// per E_Language, {0}..{9} = arguments
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

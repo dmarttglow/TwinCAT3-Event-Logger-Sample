@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Event Framework</title>
+<style>
+:root {
+  --bg: #fbfbfa; --surface: #ffffff; --text: #1d2125; --muted: #5b636b; --border: #e3e5e8;
+  --accent: #1f6feb; --code-bg: #f3f4f6; --pre-bg: #f6f7f9; --kw: #8250df; --str: #0a7f3f;
+  --cmt: #6e7781; --num: #b35900; --th-bg: #f3f4f6; --diagram: #24292f;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111418; --surface: #171b20; --text: #e3e6ea; --muted: #9aa3ad; --border: #2a3038;
+    --accent: #58a6ff; --code-bg: #222831; --pre-bg: #1a1f26; --kw: #d2a8ff; --str: #7ee2a8;
+    --cmt: #8b949e; --num: #ffb46b; --th-bg: #1f252d; --diagram: #d6dbe0;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111418; --surface: #171b20; --text: #e3e6ea; --muted: #9aa3ad; --border: #2a3038;
+  --accent: #58a6ff; --code-bg: #222831; --pre-bg: #1a1f26; --kw: #d2a8ff; --str: #7ee2a8;
+  --cmt: #8b949e; --num: #ffb46b; --th-bg: #1f252d; --diagram: #d6dbe0;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 16px; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.65 "Segoe UI", system-ui, -apple-system, sans-serif; }
+.layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); max-width: 1240px; margin: 0 auto; }
+nav { position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto;
+  padding: 40px 20px 40px 24px; border-right: 1px solid var(--border); font-size: 14px; }
+nav .label { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 12px; }
+nav a { display: block; padding: 5px 10px; margin: 0 -10px; border-radius: 6px; color: var(--muted);
+  text-decoration: none; }
+nav a:hover { color: var(--text); background: var(--code-bg); }
+nav a.active { color: var(--accent); font-weight: 600; }
+main { padding: 40px 56px 96px; min-width: 0; }
+article { max-width: 860px; }
+h1 { font-size: 2.1rem; line-height: 1.2; margin: 0 0 16px; letter-spacing: -.01em; }
+h2 { font-size: 1.5rem; margin: 56px 0 16px; padding-top: 8px; }
+h3 { font-size: 1.15rem; margin: 32px 0 10px; }
+h1, h2, h3 { position: relative; }
+.anchor { margin-left: 8px; color: var(--border); text-decoration: none; font-weight: 400; opacity: 0; }
+h2:hover .anchor, h3:hover .anchor { opacity: 1; }
+p, ul, ol { margin: 0 0 16px; }
+li { margin: 4px 0; }
+li > ul, li > ol, li > pre { margin-top: 8px; }
+a { color: var(--accent); }
+hr { border: 0; border-top: 1px solid var(--border); margin: 40px 0; }
+code { font: 0.88em/1.5 Consolas, "Cascadia Mono", ui-monospace, monospace; background: var(--code-bg);
+  padding: 2px 6px; border-radius: 4px; }
+pre { position: relative; background: var(--pre-bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 16px 18px; overflow-x: auto; margin: 0 0 20px; }
+pre code { background: none; padding: 0; font-size: 13.5px; line-height: 1.55; white-space: pre; }
+pre .tag { position: absolute; top: 6px; right: 10px; font: 600 11px/1 "Segoe UI", sans-serif;
+  color: var(--muted); letter-spacing: .04em; }
+pre.diagram code { color: var(--diagram); }
+.k { color: var(--kw); font-weight: 600; } .s { color: var(--str); } .c { color: var(--cmt); font-style: italic; }
+.n { color: var(--num); }
+.table { overflow-x: auto; margin: 0 0 20px; border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 14px; border-bottom: 1px solid var(--border); }
+th { background: var(--th-bg); font-weight: 600; }
+tbody tr:last-child td { border-bottom: 0; }
+td code, th code { white-space: nowrap; }
+.theme { position: fixed; top: 14px; right: 16px; border: 1px solid var(--border); background: var(--surface);
+  color: var(--muted); border-radius: 8px; padding: 6px 10px; font: 13px "Segoe UI", sans-serif; cursor: pointer; }
+@media (max-width: 960px) {
+  .layout { display: block; }
+  nav { display: none; }
+  main { padding: 56px 16px 64px; }
+  h1 { font-size: 1.7rem; }
+}
+@media print {
+  nav, .theme, .anchor { display: none; }
+  .layout { display: block; }
+  main { padding: 0; }
+  pre, .table { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<button class="theme" type="button" id="theme" aria-label="Toggle light or dark theme">◐ Theme</button>
+<div class="layout">
+<nav aria-label="Sections">
+<div class="label">On this page</div>
+<a href="#1-the-problem-with-the-classic-approach">1. The problem with the classic approach</a>
+<a href="#2-the-idea">2. The idea</a>
+<a href="#3-benefits">3. Benefits</a>
+<a href="#4-quick-start">4. Quick start</a>
+<a href="#5-working-with-events">5. Working with events</a>
+<a href="#6-languages">6. Languages</a>
+<a href="#7-loading-texts-from-csv-future-extension">7. Loading texts from CSV (future extension)</a>
+<a href="#8-architecture">8. Architecture</a>
+<a href="#9-project-structure">9. Project structure</a>
+<a href="#10-trade-offs-and-limitations">10. Trade-offs and limitations</a>
+<a href="#11-troubleshooting">11. Troubleshooting</a>
+</nav>
+<main><article>
+<h1 id="text-list-driven-events-for-twincat-3">Text-List Driven Events for TwinCAT 3</h1>
+<p>This sample adds a small framework on top of Beckhoff's <strong>Tc3_EventLogger</strong> library. You raise alarms and messages without ever editing the TMC event classes. You define one generic event class once. Every event after that is a line in a PLC text list.</p>
+<hr>
+<h2 id="contents">Contents<a class="anchor" href="#contents" aria-label="Link to section">#</a></h2>
+<ol><li><a href="#1-the-problem-with-the-classic-approach">The problem with the classic approach</a></li><li><a href="#2-the-idea">The idea</a></li><li><a href="#3-benefits">Benefits</a></li><li><a href="#4-quick-start">Quick start</a></li><li><a href="#5-working-with-events">Working with events</a></li><li><a href="#6-languages">Languages</a></li><li><a href="#7-loading-texts-from-csv-future-extension">Loading texts from CSV (future extension)</a></li><li><a href="#8-architecture">Architecture</a></li><li><a href="#9-project-structure">Project structure</a></li><li><a href="#10-trade-offs-and-limitations">Trade-offs and limitations</a></li><li><a href="#11-troubleshooting">Troubleshooting</a></li></ol>
+<hr>
+<h2 id="1-the-problem-with-the-classic-approach">1. The problem with the classic approach<a class="anchor" href="#1-the-problem-with-the-classic-approach" aria-label="Link to section">#</a></h2>
+<p>With plain Tc3_EventLogger, every distinct alarm text is its own event in a TMC event class:</p>
+<pre><code>Type System → Event Classes → MachineEvents
+    MotorOverTemperature   "Motor {0}: over temperature"   Error
+    MotorOverCurrent       "Motor {0}: over current"       Error
+    DoorOpen               "Safety door {0} open"          Critical
+    ... one entry per alarm, forever</code></pre>
+<p>Adding a single alarm means you:</p>
+<ol><li>Open the TMC editor in the system project and add the event, its text and its severity.</li><li>Build, so the PLC gets a new <code>TC_EVENTS.MachineEvents.X</code> constant.</li><li>Declare an <code>FB_TcAlarm</code>, call <code>CreateEx</code> with the right entry and source info, and manage <code>Raise</code> and <code>Clear</code>.</li></ol>
+<p>This causes several problems:</p>
+<ul><li><strong>Texts and code live in different places.</strong> The texts are in the system project XML, and the logic is in the PLC.</li><li><strong>Version-control diffs are hard to review.</strong> Event classes are stored as nested XML inside <code>.tsproj</code> and <code>.tmc</code> files.</li><li><strong>You repeat the same setup code</strong> (<code>CreateEx</code>, source info, edge handling) for every alarm.</li><li><strong>Raising the same alarm for several units at once needs care.</strong> The event logger identifies an alarm by its event class, event id and <em>source info</em>. If two instances share the same source info, they collide.</li></ul>
+<hr>
+<h2 id="2-the-idea">2. The idea<a class="anchor" href="#2-the-idea" aria-label="Link to section">#</a></h2>
+<p>The TMC only describes <strong>severities</strong>. The PLC owns the <strong>texts</strong>.</p>
+<pre class="diagram"><code> GVL_EventTexts (PLC)                         TMC: GenericEvents (defined once)
+ ┌─────────────────────────────────────┐      ┌──────────────────────────────┐
+ │ ConveyorJam:                        │      │ Verbose   "{0}"              │
+ │   nId       = 203                   │      │ Info      "{0}"              │
+ │   texts     = ['Conveyor {0} ...']  │      │ Warning   "{0}"              │
+ │   severity  = Error ────────────────┼─────►│ Error     "{0}"   ◄── used   │
+ └─────────────────────────────────────┘      │ Critical  "{0}"              │
+                    │                         └──────────────────────────────┘
+                    ▼                                        ▲
+   FB_CatalogAlarm: picks the text in the current language,  │
+   fills in {0}..{9} with the arguments, and passes the      │
+   finished text as argument {0} of the generic event ───────┘</code></pre>
+<ul><li>The TMC has <strong>one</strong> event class, <code>GenericEvents</code>, with one event per severity. Each event's text is just <code>{0}</code>.</li><li>Every real event is a <strong>named constant</strong> in <code>GVL_EventTexts</code>. It holds an id, a severity, an optional confirmation flag and its texts.</li><li><code>FB_CatalogAlarm</code> and <code>FB_CatalogMessage</code> look up the matching generic event by severity, build the text, and handle the event logger for you.</li><li>Each instance owns its own <strong>source info</strong>, so many alarms can be active at once, even when they all map to <code>GenericEvents.Error</code>.</li></ul>
+<hr>
+<h2 id="3-benefits">3. Benefits<a class="anchor" href="#3-benefits" aria-label="Link to section">#</a></h2>
+<h3 id="faster-to-work-with">Faster to work with<a class="anchor" href="#faster-to-work-with" aria-label="Link to section">#</a></h3>
+<div class="table"><table><thead><tr><th></th><th>Classic</th><th>This sample</th></tr></thead><tbody><tr><td>Add an alarm</td><td>TMC editor, build, <code>FB_TcAlarm</code> setup code</td><td>One line in <code>GVL_EventTexts</code>, one declaration</td></tr><tr><td>Change a text</td><td>TMC editor</td><td>Edit a string in the PLC</td></tr><tr><td>Open the TMC</td><td>For every change</td><td>Never (after the first setup)</td></tr><tr><td>Raise or clear an alarm</td><td><code>CreateEx</code>, <code>Raise</code>, <code>Clear</code> and your own edge logic</td><td><code>fbAlarm.SetActive(bCondition)</code></td></tr></tbody></table></div>
+<h3 id="safer">Safer<a class="anchor" href="#safer" aria-label="Link to section">#</a></h3>
+<ul><li><strong>Mistakes show up at compile time.</strong> <code>GVL_EventTexts.ConvyorJam</code> (misspelled) doesn't compile, and autocomplete lists every event.</li><li><strong>Source info is unique automatically.</strong> It defaults to the instance path of the alarm, so <code>MAIN.fbConveyor.fbOverTemperature</code> and <code>MAIN.fbPump.fbOverTemperature</code> never collide.</li><li><strong>Lazy creation.</strong> <code>CreateEx</code> runs on first use, never in <code>FB_init</code>, so the order in which things are initialized doesn't matter.</li><li><strong>Text formatting is bounded.</strong> Placeholders are filled in a single pass with length limits, so long or odd arguments can't overflow the text.</li></ul>
+<h3 id="easier-to-maintain">Easier to maintain<a class="anchor" href="#easier-to-maintain" aria-label="Link to section">#</a></h3>
+<ul><li><strong>All texts are in one readable file.</strong> <code>GVL_EventTexts</code> is plain Structured Text, so diffs are clean and easy to review.</li><li><strong>Translations sit next to the original text</strong>, on the same line.</li><li><strong>Ready to become a library.</strong> Everything in <code>EventFramework/</code> is independent of the application and can be packaged as a <code>.library</code>.</li></ul>
+<h3 id="easy-to-extend">Easy to extend<a class="anchor" href="#easy-to-extend" aria-label="Link to section">#</a></h3>
+<ul><li>New behaviour plugs in through interfaces, for example a CSV text source, another formatter or a different TMC mapping.</li><li>The wiring lives in one place, the composition root <code>GVL_Events</code>. Alarm declarations and machine code don't change.</li></ul>
+<hr>
+<h2 id="4-quick-start">4. Quick start<a class="anchor" href="#4-quick-start" aria-label="Link to section">#</a></h2>
+<p><strong>1. Define the event</strong> in <code>GVLs/GVL_EventTexts</code>:</p>
+<pre class="lang-iecst"><span class="tag">Structured Text</span><code>ConveyorJam : ST_EventDefinition := (nId := <span class="n">203</span>, eSeverity := TcEventSeverity.Error,
+                                     asText := [<span class="s">'Conveyor {0} jammed at {1} mm'</span>]);</code></pre>
+<p><strong>2. Declare an alarm</strong> where you need it:</p>
+<pre class="lang-iecst"><span class="tag">Structured Text</span><code><span class="k">VAR</span>
+    fbJam : FB_CatalogAlarm(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.ConveyorJam);
+<span class="k">END_VAR</span></code></pre>
+<p><strong>3. Drive it</strong> in the cyclic code:</p>
+<pre class="lang-iecst"><span class="tag">Structured Text</span><code>fbJam.Arguments.Clear().AddString(<span class="s">'Infeed'</span>).AddDInt(nPosition);
+fbJam.SetActive(bJamDetected);</code></pre>
+<p>That's all. The event logger shows <code>Conveyor Infeed jammed at 1250 mm</code> with severity Error, and the source is the instance path of <code>fbJam</code>.</p>
+<hr>
+<h2 id="5-working-with-events">5. Working with events<a class="anchor" href="#5-working-with-events" aria-label="Link to section">#</a></h2>
+<h3 id="steventdefinition">ST_EventDefinition<a class="anchor" href="#steventdefinition" aria-label="Link to section">#</a></h3>
+<div class="table"><table><thead><tr><th>Field</th><th>Meaning</th></tr></thead><tbody><tr><td><code>nId</code></td><td>Unique, stable number. It is used as the source info id, can be used to filter in the HMI, and is the key for external (CSV) texts.</td></tr><tr><td><code>eSeverity</code></td><td><code>Verbose</code>, <code>Info</code>, <code>Warning</code>, <code>Error</code> or <code>Critical</code>. Selects the generic TMC event.</td></tr><tr><td><code>bWithConfirmation</code></td><td>Alarms only. The operator has to confirm the alarm.</td></tr><tr><td><code>asText</code></td><td>One text per language (<code>E_Language</code>). <code>{0}</code> to <code>{9}</code> are replaced by the arguments. Up to 160 characters.</td></tr></tbody></table></div>
+<h3 id="alarms--fbcatalogalarm-ialarm">Alarms – <code>FB_CatalogAlarm</code> (<code>I_Alarm</code>)<a class="anchor" href="#alarms--fbcatalogalarm-ialarm" aria-label="Link to section">#</a></h3>
+<p>An alarm is an event that stays active until it is cleared.</p>
+<div class="table"><table><thead><tr><th>Member</th><th>Description</th></tr></thead><tbody><tr><td><code>SetActive(bActive)</code></td><td>Driven by the current state of a condition: raises the alarm while <code>bActive</code> is TRUE and clears it when <code>bActive</code> goes FALSE. This is usually all you need.</td></tr><tr><td><code>Raise()</code></td><td>Raises the alarm. Does nothing if it is already raised, which keeps the original text and timestamp.</td></tr><tr><td><code>Clear(bResetConfirmation)</code></td><td>Clears the alarm.</td></tr><tr><td><code>Confirm()</code></td><td>Confirms the alarm, for alarms with <code>bWithConfirmation</code>.</td></tr><tr><td><code>IsRaised</code></td><td>Whether the alarm is currently raised.</td></tr><tr><td><code>ConfirmationState</code></td><td>The event logger's confirmation state.</td></tr></tbody></table></div>
+<h3 id="messages--fbcatalogmessage-imessage">Messages – <code>FB_CatalogMessage</code> (<code>I_Message</code>)<a class="anchor" href="#messages--fbcatalogmessage-imessage" aria-label="Link to section">#</a></h3>
+<p>A message is a one-time event, such as "machine started" or a trace.</p>
+<pre class="lang-iecst"><span class="tag">Structured Text</span><code>fbStarted : FB_CatalogMessage(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.MachineStarted);
+...
+<span class="k">IF</span> rtStart.Q <span class="k">THEN</span>
+    fbStarted.Arguments.Clear().AddString(<span class="s">'Line 1'</span>).AddString(<span class="s">'Operator'</span>);
+    fbStarted.Send();
+<span class="k">END_IF</span></code></pre>
+<h3 id="shared-members-icatalogevent">Shared members (<code>I_CatalogEvent</code>)<a class="anchor" href="#shared-members-icatalogevent" aria-label="Link to section">#</a></h3>
+<div class="table"><table><thead><tr><th>Member</th><th>Description</th></tr></thead><tbody><tr><td><code>Arguments</code></td><td>Fluent builder: <code>Clear()</code>, <code>AddString</code>, <code>AddDInt</code>, <code>AddLReal(value, decimals)</code>, <code>AddBool</code>. Up to 10 arguments, <code>{0}</code> to <code>{9}</code>.</td></tr><tr><td><code>Severity</code></td><td>The severity from the definition.</td></tr><tr><td><code>LastResult</code></td><td>HRESULT of the last event logger call. Use it for diagnostics.</td></tr><tr><td><code>SourceName</code></td><td>Optional override of the source name. The default is the instance path. Only takes effect before the first raise or send.</td></tr></tbody></table></div>
+<h3 id="arguments-are-taken-over-when-the-event-is-raised">Arguments are taken over when the event is raised<a class="anchor" href="#arguments-are-taken-over-when-the-event-is-raised" aria-label="Link to section">#</a></h3>
+<p>You can refresh arguments every cycle. They are only used at the moment the alarm is raised or the message is sent. A raised alarm keeps the text it was raised with.</p>
+<pre class="lang-iecst"><span class="tag">Structured Text</span><code>fbOverTemp.Arguments.Clear().AddString(sName).AddLReal(fTemperature, <span class="n">1</span>).AddLReal(<span class="n">85</span>, <span class="n">0</span>);
+fbOverTemp.SetActive(fTemperature &gt; <span class="n">85</span>);</code></pre>
+<h3 id="simultaneous-alarms">Simultaneous alarms<a class="anchor" href="#simultaneous-alarms" aria-label="Link to section">#</a></h3>
+<p>Each instance has its own <code>FB_TcSourceInfo</code>:</p>
+<ul><li><strong>name</strong> = instance path, for example <code>MAIN.fbPump.fbOverTemperature</code></li><li><strong>id</strong> = the definition's <code>nId</code></li></ul>
+<p>Because of this, any number of instances can be active at the same time, even for the same definition and the same generic TMC event. For reusable components, declare the alarms inside the component FB, as <code>FB_Motor</code> does. Each instance of the component then brings its own alarms.</p>
+<hr>
+<h2 id="6-languages">6. Languages<a class="anchor" href="#6-languages" aria-label="Link to section">#</a></h2>
+<p>Each line in the text list holds one text per language, in the order of <code>E_Language</code>.</p>
+<p><strong>Adding a language:</strong></p>
+<ol><li><p>Add a value to <code>E_Language</code>:</p>
+<pre class="lang-iecst"><span class="tag">Structured Text</span><code>( English := <span class="n">0</span>, German := <span class="n">1</span> ) <span class="k">USINT</span>;</code></pre>
+</li><li>Raise <code>GVL_EventFramework.cLanguageCount</code> to <code>2</code>.</li><li><p>Add the translation to each line:</p>
+<pre class="lang-iecst"><span class="tag">Structured Text</span><code>MotorOverTemperature : ST_EventDefinition := (nId := <span class="n">201</span>, eSeverity := TcEventSeverity.Error,
+    asText := [<span class="s">'Motor {0}: over temperature ({1} degC, limit {2} degC)'</span>,     <span class="c">// English</span>
+               <span class="s">'Motor {0}: Übertemperatur ({1} °C, Grenze {2} °C)'</span>]);        <span class="c">// German</span></code></pre>
+</li></ol>
+<p><strong>Switching language at runtime:</strong></p>
+<pre class="lang-iecst"><span class="tag">Structured Text</span><code>GVL_Events.fbLanguage.Current := E_Language.German;</code></pre>
+<p>How the language rules work:</p>
+<ul><li>A missing translation falls back to the first language, so you can translate one line at a time.</li><li><code>{n}</code> always refers to the n-th argument, so a translation can reorder the placeholders.</li><li>A language change affects events raised after the change. Alarms that are already active keep their text.</li><li>Characters like <code>ü</code>, <code>ß</code> and <code>°</code> fit in <code>STRING</code>. Check how the HMI displays them. Alphabets such as Chinese or Russian would need <code>WSTRING</code> throughout the framework.</li></ul>
+<hr>
+<h2 id="7-loading-texts-from-csv-future-extension">7. Loading texts from CSV (future extension)<a class="anchor" href="#7-loading-texts-from-csv-future-extension" aria-label="Link to section">#</a></h2>
+<p>Texts reach the alarms through the <code>I_TextProvider</code> interface. The default, <code>FB_DefinitionTextProvider</code>, reads them from the definition. A file-based provider can sit in front of it and fall back to it, which is the <em>decorator</em> pattern:</p>
+<pre class="lang-iecst"><span class="tag">Structured Text</span><code><span class="k">FUNCTION_BLOCK</span> FB_CsvTextProvider <span class="k">IMPLEMENTS</span> I_TextProvider
+<span class="c">// FB_init(ipFallback : I_TextProvider)</span>
+<span class="c">// Body:        read the CSV once (FB_FileOpen / FB_FileGets or Tc2_Utilities.FB_CSVMemBufferReader)</span>
+<span class="c">//              into a table of  nId ; language ; text</span>
+<span class="c">// GetTemplate: look up (stDefinition.nId, eLanguage) in the table,</span>
+<span class="c">//              otherwise RETURN ipFallback.GetTemplate(eLanguage, stDefinition)</span></code></pre>
+<p>Example file:</p>
+<pre class="lang-csv"><span class="tag">CSV</span><code>nId;Language;Text
+201;0;Motor {0}: over temperature ({1} degC, limit {2} degC)
+201;1;Motor {0}: Übertemperatur ({1} °C, Grenze {2} °C)
+203;1;Förderband {0} blockiert bei {1} mm</code></pre>
+<p>Turning it on changes only the composition root:</p>
+<pre class="lang-iecst"><span class="tag">Structured Text</span><code><span class="c">// GVL_Events</span>
+fbCsvTexts : FB_CsvTextProvider(ipFallback := fbDefinitionTexts);
+fbContext  : FB_EventContext(ipTexts := fbCsvTexts, ipLanguage := fbLanguage,
+                             ipFormatter := fbFormatter, ipEventEntries := fbEventClass);</code></pre>
+<p>Call <code>GVL_Events.fbCsvTexts()</code> every cycle so the file loading can make progress. Until the file has loaded, and for any id the file doesn't contain, the texts compiled into <code>GVL_EventTexts</code> are used. The machine keeps working even if the file is missing.</p>
+<hr>
+<h2 id="8-architecture">8. Architecture<a class="anchor" href="#8-architecture" aria-label="Link to section">#</a></h2>
+<h3 id="class-diagram">Class diagram<a class="anchor" href="#class-diagram" aria-label="Link to section">#</a></h3>
+<pre class="diagram"><code>                       «interface» I_CatalogEvent
+                       Arguments, Severity, LastResult, SourceName
+                          ▲                        ▲
+            «interface» I_Alarm            «interface» I_Message
+            Raise, Clear, Confirm,         Send
+            SetActive, IsRaised
+                  ▲                                ▲
+                  │                                │
+          FB_CatalogAlarm ──extends──► FB_CatalogEventBase ◄──extends── FB_CatalogMessage
+          (owns FB_TcAlarm)            (abstract)                       (owns FB_TcMessage)
+                                       - ST_EventDefinition
+                                       - FB_TcSourceInfo
+                                       - FB_EventArgs
+                                       - EnsureCreated / BuildText
+                                       - CreateEvent (overridden)
+                                             │ uses
+                                             ▼
+                                   «interface» I_EventContext
+              ┌───────────────┬──────────────┴───────────┬────────────────────┐
+              ▼               ▼                          ▼                    ▼
+       I_TextProvider  I_LanguageProvider        I_TextFormatter     I_EventEntryProvider
+              ▲               ▲                          ▲                    ▲
+ FB_DefinitionTextProvider  FB_LanguageSelector  FB_PlaceholderFormatter  FB_GenericEventClass
+ (future: FB_CsvTextProvider)                                             (only block that knows the TMC)</code></pre>
+<h3 id="what-happens-when-an-alarm-is-raised">What happens when an alarm is raised<a class="anchor" href="#what-happens-when-an-alarm-is-raised" aria-label="Link to section">#</a></h3>
+<ol><li><code>SetActive(TRUE)</code> calls <code>Raise()</code>.</li><li><p>On first use, <code>EnsureCreated()</code>:</p>
+<ul><li>sets the source info (name = instance path, id = <code>nId</code>)</li><li>asks <code>I_EventEntryProvider</code> for the TMC entry matching the severity</li><li>calls <code>FB_TcAlarm.CreateEx(entry, bWithConfirmation, sourceInfo)</code></li></ul>
+</li><li><p><code>BuildText()</code>:</p>
+<ul><li>gets the current language from <code>I_LanguageProvider</code></li><li>gets the text for that language from <code>I_TextProvider</code></li><li>fills in the arguments with <code>I_TextFormatter</code></li></ul>
+</li><li>The finished text is passed as argument <code>{0}</code>, then <code>FB_TcAlarm.Raise(0)</code> is called.</li></ol>
+<h3 id="how-the-design-follows-solid">How the design follows SOLID<a class="anchor" href="#how-the-design-follows-solid" aria-label="Link to section">#</a></h3>
+<div class="table"><table><thead><tr><th>Principle</th><th>Where</th></tr></thead><tbody><tr><td><strong>S</strong>ingle responsibility</td><td>Each block has one job: text provider supplies the text, the language selector holds the language, the formatter formats, the entry provider maps to the TMC, the alarm and message handle the event logger.</td></tr><tr><td><strong>O</strong>pen/closed</td><td>New events are data. New text sources, formatters or mappings are new blocks, and existing code doesn't change.</td></tr><tr><td><strong>L</strong>iskov substitution</td><td>Alarms and messages can be used anywhere an <code>I_CatalogEvent</code> is expected. Any <code>I_TextProvider</code> can replace another.</td></tr><tr><td><strong>I</strong>nterface segregation</td><td>Arguments have a write side (<code>I_ArgumentBuilder</code>) for application code and a read side (<code>I_ArgumentSource</code>) for the formatter.</td></tr><tr><td><strong>D</strong>ependency inversion</td><td>Events depend only on interfaces. <code>GVL_Events</code> is the one place that wires concrete blocks together.</td></tr></tbody></table></div>
+<hr>
+<h2 id="9-project-structure">9. Project structure<a class="anchor" href="#9-project-structure" aria-label="Link to section">#</a></h2>
+<pre class="diagram"><code>EventLoggerSample (PLC)
+├── EventFramework/                  reusable part, could become a library
+│   ├── GVL_EventFramework           constants: max arguments, language count, HRESULTs
+│   ├── DUTs/
+│   │   ├── E_Language
+│   │   └── ST_EventDefinition
+│   ├── Interfaces/
+│   │   ├── I_Alarm, I_Message, I_CatalogEvent
+│   │   ├── I_ArgumentBuilder, I_ArgumentSource
+│   │   ├── I_TextProvider, I_LanguageProvider, I_TextFormatter
+│   │   └── I_EventEntryProvider, I_EventContext
+│   └── POUs/
+│       ├── FB_CatalogEventBase      abstract base
+│       ├── FB_CatalogAlarm
+│       ├── FB_CatalogMessage
+│       ├── FB_EventArgs
+│       ├── FB_PlaceholderFormatter
+│       ├── FB_DefinitionTextProvider
+│       ├── FB_LanguageSelector
+│       ├── FB_GenericEventClass     maps severity → TC_EVENTS.GenericEvents.*
+│       └── FB_EventContext
+├── GVLs/
+│   ├── GVL_EventTexts               ← the text list: the only place to add events
+│   └── GVL_Events                   composition root (wiring)
+└── POUs/
+    ├── FB_Motor                     example component with three alarms
+    └── MAIN                         demo: two motors, a door alarm, messages
+
+System project (.tsproj)
+└── Type System → Event Classes → GenericEvents   (Verbose/Info/Warning/Error/Critical, text "{0}")</code></pre>
+<h3 id="trying-the-demo">Trying the demo<a class="anchor" href="#trying-the-demo" aria-label="Link to section">#</a></h3>
+<p>Go online and change the variables in <code>MAIN</code>:</p>
+<div class="table"><table><thead><tr><th>Variable</th><th>Result</th></tr></thead><tbody><tr><td><code>fConveyorTemperature := 75</code></td><td>Warning: <em>Motor Conveyor: temperature high (75.0 degC, limit 70 degC)</em></td></tr><tr><td><code>fConveyorTemperature := 90</code> and <code>fPumpTemperature := 90</code></td><td>Two Error alarms on the same TMC event, active at the same time</td></tr><tr><td><code>fPumpCurrent := 15</code></td><td>Error: <em>Motor Pump: over current (15.00 A, limit 12.0 A)</em></td></tr><tr><td><code>bDoorOpen := TRUE</code>, then <code>bConfirmDoor</code></td><td>Critical alarm that needs confirming</td></tr><tr><td><code>bStart</code> / <code>bStop</code> / <code>bTrace</code></td><td>Info and Verbose messages</td></tr></tbody></table></div>
+<hr>
+<h2 id="10-trade-offs-and-limitations">10. Trade-offs and limitations<a class="anchor" href="#10-trade-offs-and-limitations" aria-label="Link to section">#</a></h2>
+<div class="table"><table><thead><tr><th>Topic</th><th>Details</th></tr></thead><tbody><tr><td>Language per HMI client</td><td>The text is built in the PLC when the event is raised. The whole PLC uses one language, and an active alarm keeps the language it was raised in. TwinCAT's native TMC translation, which works per HMI client, doesn't apply to these events.</td></tr><tr><td>Filtering in the HMI</td><td>All events share the class <code>GenericEvents</code>, so filter by severity, source name or source id (<code>nId</code>), not by event class or event id.</td></tr><tr><td>Text length</td><td>Up to 160 characters per template and 255 after formatting. Up to 10 arguments (<code>{0}</code> to <code>{9}</code>).</td></tr><tr><td>Unique <code>nId</code></td><td>Nothing checks that ids are unique. Duplicates still work for alarms, because source names differ, but a CSV override would apply to both.</td></tr><tr><td>Character set</td><td><code>STRING</code>. Non-Latin alphabets need <code>WSTRING</code>.</td></tr><tr><td>Memory</td><td>Each instance keeps a copy of its definition, which is roughly 160 bytes per language. This is negligible on an IPC.</td></tr></tbody></table></div>
+<hr>
+<h2 id="11-troubleshooting">11. Troubleshooting<a class="anchor" href="#11-troubleshooting" aria-label="Link to section">#</a></h2>
+<div class="table"><table><thead><tr><th>Symptom</th><th>Cause and fix</th></tr></thead><tbody><tr><td><code>TC_EVENTS.GenericEvents</code> unknown at build</td><td>The event class is missing. Check <em>Type System → Event Classes</em> and make sure the names are <code>Verbose</code>, <code>Info</code>, <code>Warning</code>, <code>Error</code> and <code>Critical</code>.</td></tr><tr><td>Nothing appears in the logger</td><td>Check <code>fbAlarm.LastResult</code>. <code>HR_NO_CONTEXT</code> (<code>16#80004003</code>) means <code>ipContext</code> wasn't passed in.</td></tr><tr><td>The text shows a raw <code>{2}</code></td><td>The text uses a placeholder with no argument. Add the argument, or fix the text.</td></tr><tr><td>A text appears in English despite a language switch</td><td>The translation is empty, or the alarm was raised before the switch.</td></tr><tr><td>The alarm text doesn't update while raised</td><td>This is intentional. Arguments are taken over when the alarm is raised. Clear and raise again to refresh the text.</td></tr><tr><td><code>SourceName</code> override has no effect</td><td>Set it before the first <code>Raise</code>, <code>SetActive</code> or <code>Send</code>.</td></tr></tbody></table></div>
+</article></main>
+</div>
+<script>
+(function () {
+  var root = document.documentElement, key = 'eventfw-theme';
+  try { var t = localStorage.getItem(key); if (t) root.setAttribute('data-theme', t); } catch (e) {}
+  document.getElementById('theme').addEventListener('click', function () {
+    var dark = root.getAttribute('data-theme') === 'dark' ||
+      (!root.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+    var next = dark ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem(key, next); } catch (e) {}
+  });
+  // highlight the current section in the sidebar
+  var links = document.querySelectorAll('nav a');
+  var heads = Array.prototype.map.call(links, function (a) { return document.getElementById(a.hash.slice(1)); });
+  function spy() {
+    var current = 0;
+    heads.forEach(function (h, i) { if (h && h.getBoundingClientRect().top < 120) current = i; });
+    links.forEach(function (a, i) { a.classList.toggle('active', i === current); });
+  }
+  addEventListener('scroll', spy, { passive: true }); spy();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <POU Name="FB_EventContext" Id="{d1caea09-763a-4400-95a8-32d8d88b23a9}" SpecialFunc="None">
+    <Declaration><![CDATA[// Composition of the event services, built once in the application's composition root.
+FUNCTION_BLOCK FB_EventContext IMPLEMENTS I_EventContext
+VAR
+	_ipTexts		: I_TextProvider;
+	_ipLanguage		: I_LanguageProvider;
+	_ipFormatter	: I_TextFormatter;
+	_ipEventEntries	: I_EventEntryProvider;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="FB_init" Id="{f6f1e899-e3f4-4807-968a-9a090c7898d9}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains	: BOOL;
+	bInCopyCode		: BOOL;
+	ipTexts			: I_TextProvider;
+	ipLanguage		: I_LanguageProvider;
+	ipFormatter		: I_TextFormatter;
+	ipEventEntries	: I_EventEntryProvider;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_ipTexts := ipTexts;
+_ipLanguage := ipLanguage;
+_ipFormatter := ipFormatter;
+_ipEventEntries := ipEventEntries;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Texts" Id="{1c9ca600-785c-40c1-9b3e-5f97eb756a7e}">
+      <Declaration><![CDATA[PROPERTY Texts : I_TextProvider]]></Declaration>
+      <Get Name="Get" Id="{af7b2781-f1ca-418e-8cc4-a8354c7d544d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Texts := _ipTexts;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Language" Id="{71f66701-5201-42a1-af3b-d49b1ab4f252}">
+      <Declaration><![CDATA[PROPERTY Language : I_LanguageProvider]]></Declaration>
+      <Get Name="Get" Id="{c7a437be-e62a-4a75-a806-fc71f1e69c8f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Language := _ipLanguage;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Formatter" Id="{7aa437eb-2ecf-412f-8fbf-0a1cde23722b}">
+      <Declaration><![CDATA[PROPERTY Formatter : I_TextFormatter]]></Declaration>
+      <Get Name="Get" Id="{b4bee6bc-eefe-46fb-8874-49e70efa9fd3}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Formatter := _ipFormatter;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="EventEntries" Id="{c81f2f39-765b-451b-9c4e-4a0ac4f0a59f}">
+      <Declaration><![CDATA[PROPERTY EventEntries : I_EventEntryProvider]]></Declaration>
+      <Get Name="Get" Id="{215c3038-be8a-4b06-8071-a1f0f33a4988}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[EventEntries := _ipEventEntries;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+  </POU>
+</TcPlcObject>

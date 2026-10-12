@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <POU Name="FB_CatalogMessage" Id="{9385f519-9b28-4e74-9657-543aaa1eddd9}" SpecialFunc="None">
+    <Declaration><![CDATA[// Fire-and-forget message whose severity and text come from the event catalog.
+FUNCTION_BLOCK FB_CatalogMessage EXTENDS FB_CatalogEventBase IMPLEMENTS I_Message
+VAR
+	_fbMessage	: FB_TcMessage;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="CreateEvent" Id="{8bbcde68-6510-4aef-a360-593251362ffa}">
+      <Declaration><![CDATA[METHOD PROTECTED CreateEvent : HRESULT
+VAR_INPUT
+	stEventEntry	: TcEventEntry;
+	ipSourceInfo	: I_TcSourceInfo;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CreateEvent := _fbMessage.CreateEx(stEventEntry := stEventEntry, ipSourceInfo := ipSourceInfo);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Send" Id="{2bf7a438-844d-4c87-a04e-c16c87ceb717}">
+      <Declaration><![CDATA[METHOD Send : HRESULT
+VAR
+	sText	: T_MaxString;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT EnsureCreated() THEN
+	Send := _hrLast;
+	RETURN;
+END_IF
+
+sText := BuildText();
+_fbMessage.ipArguments.Clear().AddString(sText);
+_hrLast := _fbMessage.Send(0);
+Send := _hrLast;
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

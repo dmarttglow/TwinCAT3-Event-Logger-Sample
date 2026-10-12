@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <POU Name="MAIN" Id="{2cf3f49d-77ff-4425-b360-3a9cfce3e882}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	// Simulation inputs - change them online
+	fConveyorTemperature	: LREAL := 40.0;
+	fConveyorCurrent		: LREAL := 5.0;
+	fPumpTemperature		: LREAL := 40.0;
+	fPumpCurrent			: LREAL := 5.0;
+	bDoorOpen				: BOOL;
+	bConfirmDoor			: BOOL;
+	bStart					: BOOL;
+	bStop					: BOOL;
+	bTrace					: BOOL;
+
+	fbConveyor	: FB_Motor;
+	fbPump		: FB_Motor;
+
+	fbDoorOpen	: FB_CatalogAlarm(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.DoorOpen);
+	fbStarted	: FB_CatalogMessage(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.MachineStarted);
+	fbStopped	: FB_CatalogMessage(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.MachineStopped);
+	fbTrace		: FB_CatalogMessage(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.DebugTrace);
+
+	rtStart		: R_TRIG;
+	rtStop		: R_TRIG;
+	rtTrace		: R_TRIG;
+	rtConfirm	: R_TRIG;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// Two motors raise the same generic TMC events (e.g. GenericEvents.Error) at the same time
+fbConveyor(sName := 'Conveyor', fTemperature := fConveyorTemperature, fCurrent := fConveyorCurrent);
+fbPump(sName := 'Pump', fTemperature := fPumpTemperature, fCurrent := fPumpCurrent);
+
+// Alarm with confirmation (bWithConfirmation in the text list)
+fbDoorOpen.Arguments.Clear().AddString('Front');
+fbDoorOpen.SetActive(bDoorOpen);
+rtConfirm(CLK := bConfirmDoor);
+IF rtConfirm.Q THEN
+	fbDoorOpen.Confirm();
+END_IF
+
+// Messages
+rtStart(CLK := bStart);
+IF rtStart.Q THEN
+	fbStarted.Arguments.Clear().AddString('Line 1').AddString('Operator');
+	fbStarted.Send();
+END_IF
+
+rtStop(CLK := bStop);
+IF rtStop.Q THEN
+	fbStopped.Arguments.Clear().AddString('Line 1');
+	fbStopped.Send();
+END_IF
+
+rtTrace(CLK := bTrace);
+IF rtTrace.Q THEN
+	fbTrace.Arguments.Clear().AddString('Conveyor temperature').AddLReal(fConveyorTemperature, 2);
+	fbTrace.Send();
+END_IF
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

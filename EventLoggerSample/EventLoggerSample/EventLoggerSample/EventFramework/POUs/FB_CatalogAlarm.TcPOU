@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <POU Name="FB_CatalogAlarm" Id="{38815c93-2488-445f-a0ab-c69627dd2b87}" SpecialFunc="None">
+    <Declaration><![CDATA[// Stateful alarm whose severity and text come from the event catalog.
+// Declare as:  fbX : FB_CatalogAlarm(ipContext := GVL_Events.fbContext, stDefinition := GVL_EventTexts.X);
+FUNCTION_BLOCK FB_CatalogAlarm EXTENDS FB_CatalogEventBase IMPLEMENTS I_Alarm
+VAR
+	_fbAlarm	: FB_TcAlarm;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="CreateEvent" Id="{ed465c8b-a2c8-4099-b71b-077784839253}">
+      <Declaration><![CDATA[METHOD PROTECTED CreateEvent : HRESULT
+VAR_INPUT
+	stEventEntry	: TcEventEntry;
+	ipSourceInfo	: I_TcSourceInfo;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CreateEvent := _fbAlarm.CreateEx(stEventEntry := stEventEntry,
+								 bWithConfirmation := _stDefinition.bWithConfirmation,
+								 ipSourceInfo := ipSourceInfo);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Raise" Id="{97a263d0-7573-4072-99b3-0943e40fadcd}">
+      <Declaration><![CDATA[METHOD Raise : HRESULT
+VAR
+	sText	: T_MaxString;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT EnsureCreated() THEN
+	Raise := _hrLast;
+	RETURN;
+END_IF
+
+// Already active: keep the original text and timestamp
+IF _fbAlarm.bRaised THEN
+	RETURN;
+END_IF
+
+sText := BuildText();
+_fbAlarm.ipArguments.Clear().AddString(sText);
+_hrLast := _fbAlarm.Raise(0);
+Raise := _hrLast;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Clear" Id="{65794b62-ad1c-4678-9e2a-8d32b6803bfb}">
+      <Declaration><![CDATA[METHOD Clear : HRESULT
+VAR_INPUT
+	bResetConfirmation	: BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT _bCreated THEN
+	RETURN;
+END_IF
+_hrLast := _fbAlarm.Clear(0, bResetConfirmation);
+Clear := _hrLast;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Confirm" Id="{1f12628b-291b-43bf-9530-df7b1ad0e984}">
+      <Declaration><![CDATA[METHOD Confirm : HRESULT
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT _bCreated THEN
+	RETURN;
+END_IF
+_hrLast := _fbAlarm.Confirm(0);
+Confirm := _hrLast;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetActive" Id="{8f21fed1-f987-49a6-bfd8-521c683ff347}">
+      <Declaration><![CDATA[METHOD SetActive : HRESULT
+VAR_INPUT
+	bActive	: BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF bActive AND NOT IsRaised THEN
+	SetActive := Raise();
+ELSIF NOT bActive AND IsRaised THEN
+	SetActive := Clear(bResetConfirmation := FALSE);
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="IsRaised" Id="{c1ee5d09-5a4c-42e3-b2fd-97565bb77802}">
+      <Declaration><![CDATA[PROPERTY IsRaised : BOOL]]></Declaration>
+      <Get Name="Get" Id="{a0d5d7c1-f3e3-47c4-97ab-f9c739bf70aa}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IsRaised := _bCreated AND_THEN _fbAlarm.bRaised;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ConfirmationState" Id="{2a0c2e81-056c-4280-8eb1-86a66dfc6a7c}">
+      <Declaration><![CDATA[PROPERTY ConfirmationState : TcEventConfirmationState]]></Declaration>
+      <Get Name="Get" Id="{fa241267-8d81-4ee9-8472-a37179725ca6}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ConfirmationState := _fbAlarm.eConfirmationState;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+  </POU>
+</TcPlcObject>

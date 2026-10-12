@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.26">
+  <Itf Name="I_ArgumentSource" Id="{08d93581-01d4-4101-a4e2-52ee62d0ea39}">
+    <Declaration><![CDATA[// Read side of the event arguments (used by formatters).
+INTERFACE I_ArgumentSource
+]]></Declaration>
+    <Property Name="Count" Id="{d732e6da-0dc4-4618-a533-399188064a72}">
+      <Declaration><![CDATA[PROPERTY Count : USINT
+]]></Declaration>
+      <Get Name="Get" Id="{4ca92ffc-6305-4084-a759-c03e131375ea}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="GetArgument" Id="{c4f8c8b5-5533-45e7-9b9a-b6591746c9e3}">
+      <Declaration><![CDATA[METHOD GetArgument : T_MaxString
+VAR_INPUT
+	nIndex	: USINT;
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

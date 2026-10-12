@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <FileVersion>1.0.0.0</FileVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{ea22082e-84e5-4c2f-bb70-f26fc7ff8dff}</ProjectGuid>
+    <SubObjectsSortedByName>true</SubObjectsSortedByName>
+    <DownloadApplicationInfo>true</DownloadApplicationInfo>
+    <WriteProductVersion>false</WriteProductVersion>
+    <GenerateTpy>false</GenerateTpy>
+    <Name>EventLoggerSample</Name>
+    <ProgramVersion>3.1.4026.26</ProgramVersion>
+    <Application>{918732b5-5155-4aba-afcf-92e9887c0773}</Application>
+    <TypeSystem>{de5ba105-eb22-481b-ba8d-5ab8286f750c}</TypeSystem>
+    <Implicit_Task_Info>{cd12a801-be5f-4ab1-b1d8-1874860f6e7f}</Implicit_Task_Info>
+    <Implicit_KindOfTask>{21548811-7605-434c-be60-99c57cbb36b8}</Implicit_KindOfTask>
+    <Implicit_Jitter_Distribution>{f50a6417-802f-4ff8-94b6-7c427a55f8ff}</Implicit_Jitter_Distribution>
+    <LibraryReferences>{9eef8195-73e0-41df-81f6-d70fbf1fcef0}</LibraryReferences>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="EventFramework\DUTs\E_Language.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventFramework\DUTs\ST_EventDefinition.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventFramework\GVL_EventFramework.TcGVL">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventFramework\Interfaces\I_Alarm.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventFramework\Interfaces\I_ArgumentBuilder.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventFramework\Interfaces\I_ArgumentSource.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventFramework\Interfaces\I_CatalogEvent.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventFramework\Interfaces\I_EventContext.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventFramework\Interfaces\I_EventEntryProvider.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventFramework\Interfaces\I_LanguageProvider.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventFramework\Interfaces\I_Message.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventFramework\Interfaces\I_TextFormatter.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventFramework\Interfaces\I_TextProvider.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventFramework\POUs\FB_CatalogAlarm.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventFramework\POUs\FB_CatalogEventBase.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventFramework\POUs\FB_CatalogMessage.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventFramework\POUs\FB_DefinitionTextProvider.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventFramework\POUs\FB_EventArgs.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventFramework\POUs\FB_EventContext.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventFramework\POUs\FB_GenericEventClass.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventFramework\POUs\FB_LanguageSelector.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EventFramework\POUs\FB_PlaceholderFormatter.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GVLs\GVL_EventTexts.TcGVL">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GVLs\GVL_Events.TcGVL">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\FB_Motor.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\MAIN.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PlcTask.TcTTO">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DUTs" />
+    <Folder Include="GVLs" />
+    <Folder Include="POUs" />
+    <Folder Include="VISUs" />
+    <Folder Include="EventFramework" />
+    <Folder Include="EventFramework\DUTs" />
+    <Folder Include="EventFramework\Interfaces" />
+    <Folder Include="EventFramework\POUs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PlaceholderReference Include="Tc2_Standard">
+      <DefaultResolution>Tc2_Standard, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_Standard</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_System">
+      <DefaultResolution>Tc2_System, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_System</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc3_EventLogger">
+      <DefaultResolution>Tc3_EventLogger, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc3_EventLogger</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc3_Module">
+      <DefaultResolution>Tc3_Module, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc3_Module</Namespace>
+      <SystemLibrary>true</SystemLibrary>
+    </PlaceholderReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="EventLoggerSample.tmc">
+      <SubType>Content</SubType>
+    </None>
+  </ItemGroup>
+  <ProjectExtensions>
+    <PlcProjectOptions>
+      <XmlArchive>
+        <Data>
+          <o xml:space="preserve" t="OptionKey">
+      <v n="Name">"&lt;ProjectRoot&gt;"</v>
+      <d n="SubKeys" t="Hashtable" ckt="String" cvt="OptionKey">
+        <v>{29BD8D0C-3586-4548-BB48-497B9A01693F}</v>
+        <o>
+          <v n="Name">"{29BD8D0C-3586-4548-BB48-497B9A01693F}"</v>
+          <d n="SubKeys" t="Hashtable" ckt="String" cvt="OptionKey">
+            <v>Rules</v>
+            <o>
+              <v n="Name">"Rules"</v>
+              <d n="SubKeys" t="Hashtable" />
+              <d n="Values" t="Hashtable" />
+            </o>
+          </d>
+          <d n="Values" t="Hashtable" />
+        </o>
+        <v>{8A0FB252-96EB-4DCC-A5B4-B4804D05E2D6}</v>
+        <o>
+          <v n="Name">"{8A0FB252-96EB-4DCC-A5B4-B4804D05E2D6}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
+            <v>WriteLineIDs</v>
+            <v>False</v>
+          </d>
+        </o>
+        <v>{8F99A816-E488-41E4-9FA3-846536012284}</v>
+        <o>
+          <v n="Name">"{8F99A816-E488-41E4-9FA3-846536012284}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" ckt="String" cvt="String">
+            <v>DisabledWarningIds</v>
+            <v>410,5410</v>
+          </d>
+        </o>
+        <v>{F66C7017-BDD8-4114-926C-81D6D687E35F}</v>
+        <o>
+          <v n="Name">"{F66C7017-BDD8-4114-926C-81D6D687E35F}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
+            <v>CalcActiveTransOnly</v>
+            <v>True</v>
+          </d>
+        </o>
+      </d>
+      <d n="Values" t="Hashtable" />
+    </o>
+        </Data>
+        <TypeList>
+          <Type n="Boolean">System.Boolean</Type>
+          <Type n="Hashtable">System.Collections.Hashtable</Type>
+          <Type n="OptionKey">{54dd0eac-a6d8-46f2-8c27-2f43c7e49861}</Type>
+          <Type n="String">System.String</Type>
+        </TypeList>
+      </XmlArchive>
+    </PlcProjectOptions>
+  </ProjectExtensions>
+</Project>
