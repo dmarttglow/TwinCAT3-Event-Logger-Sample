@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Event Framework – User Guide</title>
+<style>
+:root {
+  --bg: #fbfbfa; --surface: #ffffff; --text: #1d2125; --muted: #5b636b; --border: #e3e5e8;
+  --accent: #1f6feb; --code-bg: #f3f4f6; --pre-bg: #f6f7f9; --kw: #8250df; --str: #0a7f3f;
+  --cmt: #6e7781; --num: #b35900; --th-bg: #f3f4f6; --diagram: #24292f;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111418; --surface: #171b20; --text: #e3e6ea; --muted: #9aa3ad; --border: #2a3038;
+    --accent: #58a6ff; --code-bg: #222831; --pre-bg: #1a1f26; --kw: #d2a8ff; --str: #7ee2a8;
+    --cmt: #8b949e; --num: #ffb46b; --th-bg: #1f252d; --diagram: #d6dbe0;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111418; --surface: #171b20; --text: #e3e6ea; --muted: #9aa3ad; --border: #2a3038;
+  --accent: #58a6ff; --code-bg: #222831; --pre-bg: #1a1f26; --kw: #d2a8ff; --str: #7ee2a8;
+  --cmt: #8b949e; --num: #ffb46b; --th-bg: #1f252d; --diagram: #d6dbe0;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 16px; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.65 "Segoe UI", system-ui, -apple-system, sans-serif; }
+.layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); max-width: 1240px; margin: 0 auto; }
+nav { position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto;
+  padding: 40px 20px 40px 24px; border-right: 1px solid var(--border); font-size: 14px; }
+nav .label { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 12px; }
+nav a { display: block; padding: 5px 10px; margin: 0 -10px; border-radius: 6px; color: var(--muted);
+  text-decoration: none; }
+nav a:hover { color: var(--text); background: var(--code-bg); }
+nav a.active { color: var(--accent); font-weight: 600; }
+main { padding: 40px 56px 96px; min-width: 0; }
+article { max-width: 860px; }
+h1 { font-size: 2.1rem; line-height: 1.2; margin: 0 0 16px; letter-spacing: -.01em; }
+h2 { font-size: 1.5rem; margin: 56px 0 16px; padding-top: 8px; }
+h3 { font-size: 1.15rem; margin: 32px 0 10px; }
+h1, h2, h3 { position: relative; }
+.anchor { margin-left: 8px; color: var(--border); text-decoration: none; font-weight: 400; opacity: 0; }
+h2:hover .anchor, h3:hover .anchor { opacity: 1; }
+p, ul, ol { margin: 0 0 16px; }
+li { margin: 4px 0; }
+li > ul, li > ol, li > pre { margin-top: 8px; }
+a { color: var(--accent); }
+hr { border: 0; border-top: 1px solid var(--border); margin: 40px 0; }
+code { font: 0.88em/1.5 Consolas, "Cascadia Mono", ui-monospace, monospace; background: var(--code-bg);
+  padding: 2px 6px; border-radius: 4px; }
+pre { position: relative; background: var(--pre-bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 16px 18px; overflow-x: auto; margin: 0 0 20px; }
+pre code { background: none; padding: 0; font-size: 13.5px; line-height: 1.55; white-space: pre; }
+pre .tag { position: absolute; top: 6px; right: 10px; font: 600 11px/1 "Segoe UI", sans-serif;
+  color: var(--muted); letter-spacing: .04em; }
+pre.diagram code { color: var(--diagram); }
+.k { color: var(--kw); font-weight: 600; } .s { color: var(--str); } .c { color: var(--cmt); font-style: italic; }
+.n { color: var(--num); }
+.table { overflow-x: auto; margin: 0 0 20px; border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 14px; border-bottom: 1px solid var(--border); }
+th { background: var(--th-bg); font-weight: 600; }
+tbody tr:last-child td { border-bottom: 0; }
+td code, th code { white-space: nowrap; }
+.theme { position: fixed; top: 14px; right: 16px; border: 1px solid var(--border); background: var(--surface);
+  color: var(--muted); border-radius: 8px; padding: 6px 10px; font: 13px "Segoe UI", sans-serif; cursor: pointer; }
+@media (max-width: 960px) {
+  .layout { display: block; }
+  nav { display: none; }
+  main { padding: 56px 16px 64px; }
+  h1 { font-size: 1.7rem; }
+}
+@media print {
+  nav, .theme, .anchor { display: none; }
+  .layout { display: block; }
+  main { padding: 0; }
+  pre, .table { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<button class="theme" type="button" id="theme" aria-label="Toggle light or dark theme">◐ Theme</button>
+<div class="layout">
+<nav aria-label="Sections">
+<div class="label">On this page</div>
+<a href="#1-what-you-need">1. What you need</a>
+<a href="#2-adding-the-framework-to-a-project">2. Adding the framework to a project</a>
+<a href="#3-defining-events">3. Defining events</a>
+<a href="#4-alarms">4. Alarms</a>
+<a href="#5-messages">5. Messages</a>
+<a href="#6-arguments">6. Arguments</a>
+<a href="#7-languages">7. Languages</a>
+<a href="#8-updating-to-a-new-library-version">8. Updating to a new library version</a>
+<a href="#9-troubleshooting">9. Troubleshooting</a>
+</nav>
+<main><article>
+<h1 id="event-framework--user-guide">Event Framework – User Guide</h1>
+<p>How to add the EventFramework library to a TwinCAT project and use it to raise alarms and messages.</p>
+<hr>
+<h2 id="contents">Contents<a class="anchor" href="#contents" aria-label="Link to section">#</a></h2>
+<ol><li><a href="#1-what-you-need">What you need</a></li><li><a href="#2-adding-the-framework-to-a-project">Adding the framework to a project</a></li><li><a href="#3-defining-events">Defining events</a></li><li><a href="#4-alarms">Alarms</a></li><li><a href="#5-messages">Messages</a></li><li><a href="#6-arguments">Arguments</a></li><li><a href="#7-languages">Languages</a></li><li><a href="#8-updating-to-a-new-library-version">Updating to a new library version</a></li><li><a href="#9-troubleshooting">Troubleshooting</a></li></ol>
+<hr>
+<h2 id="1-what-you-need">1. What you need<a class="anchor" href="#1-what-you-need" aria-label="Link to section">#</a></h2>
+<ul><li>TwinCAT 3.1 XAE (4024 or 4026) installed on the engineering PC.</li><li>A folder with the framework files:</li></ul>
+<div class="table"><table><thead><tr><th>File</th><th>What it is</th></tr></thead><tbody><tr><td><code>EventFramework.library</code></td><td>The library.</td></tr><tr><td><code>EventFramework.tmc</code></td><td>The event classes the library needs in the type system.</td></tr><tr><td><code>GVL_EventTexts.TcGVL</code></td><td>A starter text list for your events.</td></tr><tr><td><code>Add-EventFramework.ps1</code> and <code>Add-EventFramework.cmd</code></td><td>The setup script.</td></tr></tbody></table></div>
+<p>The files can sit in subfolders. The script searches the whole folder.</p>
+<hr>
+<h2 id="2-adding-the-framework-to-a-project">2. Adding the framework to a project<a class="anchor" href="#2-adding-the-framework-to-a-project" aria-label="Link to section">#</a></h2>
+<h3 id="run-the-script">Run the script<a class="anchor" href="#run-the-script" aria-label="Link to section">#</a></h3>
+<ol><li><strong>Close the solution in TwinCAT XAE</strong>, or be ready to reload it.</li><li><p>Run the script with your solution and the folder holding the framework files:</p>
+<pre><code>Add-EventFramework.cmd "D:\Projects\Machine\Machine.sln" "D:\Releases\EventFramework"</code></pre>
+<p>Or double-click <code>Add-EventFramework.cmd</code> and enter the path to your solution when asked. The files are then taken from the script's own folder.</p>
+</li><li>Open the solution, reload it if XAE asks, and build.</li></ol>
+<p>The script:</p>
+<ol><li>Installs the library on this PC.</li><li>Adds the event classes to the type system of your project.</li><li>Adds the <code>EventFramework</code> library reference to your PLC project.</li><li>Adds <code>GVL_EventTexts</code> to your PLC project, in the <code>GVLs</code> folder.</li></ol>
+<p>Before it changes anything, the script prints which files it is using. Running it again is safe: it only adds what is missing and <strong>never overwrites an existing <code>GVL_EventTexts</code></strong>.</p>
+<p>To see what the script would do without changing anything, add <code>-WhatIf</code>.</p>
+<h3 id="options">Options<a class="anchor" href="#options" aria-label="Link to section">#</a></h3>
+<div class="table"><table><thead><tr><th>Option</th><th>Use it to</th></tr></thead><tbody><tr><td><code>-PlcProject &lt;name&gt;</code></td><td>Pick the PLC project, when the solution has more than one.</td></tr><tr><td><code>-Version 1.0.0.1</code></td><td>Use one fixed library version. The default <code>*</code> always uses the newest installed version.</td></tr><tr><td><code>-GvlFolder &lt;folder&gt;</code></td><td>Put <code>GVL_EventTexts</code> in another folder, for example <code>GVLs\Events</code>.</td></tr><tr><td><code>-SkipGvl</code></td><td>Leave out <code>GVL_EventTexts</code>, for example when you write your own.</td></tr><tr><td><code>-SkipInstall</code></td><td>Don't install the library, only change the project.</td></tr><tr><td><code>-TmcMode AdditionalFile</code></td><td>Add the event classes as a separate <code>.tmc</code> file under <em>Type System → Additional TMC files</em> instead of inside the project. Commit that <code>.tmc</code> file: the usual TwinCAT <code>.gitignore</code> excludes <code>*.tmc</code>.</td></tr><tr><td><code>-LibraryPath</code>, <code>-TmcPath</code>, <code>-GvlTemplate</code></td><td>Use one specific file instead of searching the folder.</td></tr><tr><td><code>-WhatIf</code></td><td>Show the changes without making them.</td></tr></tbody></table></div>
+<p>Examples:</p>
+<pre><code>Add-EventFramework.cmd "D:\Projects\Machine" "D:\Releases\EventFramework" -PlcProject MainPlc
+Add-EventFramework.cmd "D:\Projects\Machine\Machine.sln" "D:\Releases\EventFramework" -Version 1.0.0.1 -WhatIf</code></pre>
+<p>From PowerShell, call the script directly:</p>
+<pre><code>.\Add-EventFramework.ps1 -Project D:\Projects\Machine\Machine.sln -Source D:\Releases\EventFramework</code></pre>
+<h3 id="installing-on-another-pc">Installing on another PC<a class="anchor" href="#installing-on-another-pc" aria-label="Link to section">#</a></h3>
+<p>Every engineering PC that builds the project needs the library installed. Run the script on that PC too, or install the library by hand in XAE: <em>PLC → Library Repository → Install…</em> and select <code>EventFramework.library</code>.</p>
+<hr>
+<h2 id="3-defining-events">3. Defining events<a class="anchor" href="#3-defining-events" aria-label="Link to section">#</a></h2>
+<p>Every event is one line in <code>GVL_EventTexts</code>:</p>
+<pre class="lang-iecst"><span class="tag">Structured Text</span><code>{attribute <span class="s">'qualified_only'</span>}
+<span class="k">VAR_GLOBAL</span> <span class="k">CONSTANT</span>
+	MachineStarted   : ST_EventDefinition := (nId := <span class="n">100</span>, eSeverity := TcEventSeverity.Info,     asText := [<span class="s">'Machine {0} started'</span>]);
+	MotorOverCurrent : ST_EventDefinition := (nId := <span class="n">200</span>, eSeverity := TcEventSeverity.Error,    asText := [<span class="s">'Motor {0}: over current ({1} A, limit {2} A)'</span>]);
+	DoorOpen         : ST_EventDefinition := (nId := <span class="n">300</span>, eSeverity := TcEventSeverity.Critical, bWithConfirmation := <span class="k">TRUE</span>, asText := [<span class="s">'Safety door {0} open'</span>]);
+<span class="k">END_VAR</span></code></pre>
+<div class="table"><table><thead><tr><th>Field</th><th>Meaning</th></tr></thead><tbody><tr><td><code>nId</code></td><td>A unique number for the event. Keep it stable: it can be used to filter events in the HMI.</td></tr><tr><td><code>eSeverity</code></td><td><code>Verbose</code>, <code>Info</code>, <code>Warning</code>, <code>Error</code> or <code>Critical</code>.</td></tr><tr><td><code>bWithConfirmation</code></td><td>Alarms only. The operator has to confirm the alarm. Leave it out for no confirmation.</td></tr><tr><td><code>asText</code></td><td>The text, up to 160 characters. <code>{0}</code> to <code>{9}</code> are replaced by the arguments. With several languages, one text per language (see <a href="#7-languages">Languages</a>).</td></tr></tbody></table></div>
+<p>Tips:</p>
+<ul><li>Group the ids, for example 100–199 machine, 200–299 motors, 300–399 safety.</li><li>The name of the constant is what you use in code, so give it a clear name. A misspelled name doesn't compile.</li></ul>
+<hr>
+<h2 id="4-alarms">4. Alarms<a class="anchor" href="#4-alarms" aria-label="Link to section">#</a></h2>
+<p>An alarm stays active until it is cleared.</p>
+<p><strong>Declare</strong> it where you need it, with the event from the text list:</p>
+<pre class="lang-iecst"><span class="tag">Structured Text</span><code><span class="k">VAR</span>
+	fbOverCurrent : FB_CatalogAlarm(stDefinition := GVL_EventTexts.MotorOverCurrent);
+<span class="k">END_VAR</span></code></pre>
+<p><strong>Drive</strong> it every cycle from a condition:</p>
+<pre class="lang-iecst"><span class="tag">Structured Text</span><code>fbOverCurrent.Arguments.Clear().AddString(<span class="s">'Pump'</span>).AddLReal(fCurrent, <span class="n">2</span>).AddLReal(<span class="n">12</span>, <span class="n">1</span>);
+fbOverCurrent.SetActive(fCurrent &gt; <span class="n">12</span>);</code></pre>
+<p>The alarm is raised when the condition becomes TRUE and cleared when it becomes FALSE. The logger shows <em>Motor Pump: over current (15.00 A, limit 12.0 A)</em>.</p>
+<div class="table"><table><thead><tr><th>Member</th><th>Description</th></tr></thead><tbody><tr><td><code>SetActive(bActive)</code></td><td>Raises the alarm while <code>bActive</code> is TRUE, clears it when <code>bActive</code> goes FALSE. Usually all you need.</td></tr><tr><td><code>Raise()</code></td><td>Raises the alarm. Does nothing if it is already raised.</td></tr><tr><td><code>Clear(bResetConfirmation)</code></td><td>Clears the alarm.</td></tr><tr><td><code>Confirm()</code></td><td>Confirms an alarm that has <code>bWithConfirmation</code>.</td></tr><tr><td><code>IsRaised</code></td><td>TRUE while the alarm is raised.</td></tr><tr><td><code>ConfirmationState</code></td><td>The confirmation state of the alarm.</td></tr><tr><td><code>LastResult</code></td><td>Result of the last call. Look here when an alarm doesn't appear.</td></tr></tbody></table></div>
+<h3 id="alarms-in-reusable-function-blocks">Alarms in reusable function blocks<a class="anchor" href="#alarms-in-reusable-function-blocks" aria-label="Link to section">#</a></h3>
+<p>Declare the alarms inside the function block. Every instance then has its own alarms, and they can all be active at the same time:</p>
+<pre class="lang-iecst"><span class="tag">Structured Text</span><code><span class="k">FUNCTION_BLOCK</span> FB_Motor
+<span class="k">VAR_INPUT</span>
+	sName    : <span class="k">STRING</span>;
+	fCurrent : <span class="k">LREAL</span>;
+<span class="k">END_VAR</span>
+<span class="k">VAR</span>
+	fbOverCurrent : FB_CatalogAlarm(stDefinition := GVL_EventTexts.MotorOverCurrent);
+<span class="k">END_VAR</span>
+
+fbOverCurrent.Arguments.Clear().AddString(sName).AddLReal(fCurrent, <span class="n">2</span>).AddLReal(<span class="n">12</span>, <span class="n">1</span>);
+fbOverCurrent.SetActive(fCurrent &gt; <span class="n">12</span>);</code></pre>
+<p>The source of each alarm in the logger is the instance path, for example <code>MAIN.fbPump.fbOverCurrent</code>. To show a different source name, set <code>SourceName</code> before the alarm is raised for the first time.</p>
+<hr>
+<h2 id="5-messages">5. Messages<a class="anchor" href="#5-messages" aria-label="Link to section">#</a></h2>
+<p>A message is a one-time event, such as "machine started".</p>
+<pre class="lang-iecst"><span class="tag">Structured Text</span><code><span class="k">VAR</span>
+	fbStarted : FB_CatalogMessage(stDefinition := GVL_EventTexts.MachineStarted);
+	rtStart   : R_TRIG;
+<span class="k">END_VAR</span>
+
+rtStart(CLK := bStart);
+<span class="k">IF</span> rtStart.Q <span class="k">THEN</span>
+	fbStarted.Arguments.Clear().AddString(<span class="s">'Line 1'</span>);
+	fbStarted.Send();
+<span class="k">END_IF</span></code></pre>
+<p>Call <code>Send()</code> once per occurrence, for example on a rising edge. Calling it every cycle sends a message every cycle.</p>
+<hr>
+<h2 id="6-arguments">6. Arguments<a class="anchor" href="#6-arguments" aria-label="Link to section">#</a></h2>
+<p>Arguments fill in <code>{0}</code> to <code>{9}</code> in the text, in the order they are added:</p>
+<div class="table"><table><thead><tr><th>Method</th><th>Example</th><th>Shows</th></tr></thead><tbody><tr><td><code>AddString(s)</code></td><td><code>AddString('Pump')</code></td><td><code>Pump</code></td></tr><tr><td><code>AddDInt(n)</code></td><td><code>AddDInt(1250)</code></td><td><code>1250</code></td></tr><tr><td><code>AddLReal(f, decimals)</code></td><td><code>AddLReal(15.237, 2)</code></td><td><code>15.24</code></td></tr><tr><td><code>AddBool(b)</code></td><td><code>AddBool(TRUE)</code></td><td><code>TRUE</code></td></tr></tbody></table></div>
+<ul><li>Always start with <code>Clear()</code>, then chain the values: <code>Arguments.Clear().AddString(sName).AddDInt(nPos)</code>.</li><li>Up to 10 arguments.</li><li>The arguments are used at the moment an alarm is raised or a message is sent. A raised alarm keeps its text: if the value changes later, the text doesn't. Clear and raise again to show the new value.</li><li>A placeholder without an argument stays visible as <code>{2}</code> in the text, so it's easy to spot.</li></ul>
+<hr>
+<h2 id="7-languages">7. Languages<a class="anchor" href="#7-languages" aria-label="Link to section">#</a></h2>
+<h3 id="translating-texts">Translating texts<a class="anchor" href="#translating-texts" aria-label="Link to section">#</a></h3>
+<p>Put one text per language in <code>asText</code>, in this order: English, German.</p>
+<pre class="lang-iecst"><span class="tag">Structured Text</span><code>MotorOverCurrent : ST_EventDefinition := (nId := <span class="n">200</span>, eSeverity := TcEventSeverity.Error,
+	asText := [<span class="s">'Motor {0}: over current ({1} A, limit {2} A)'</span>,         <span class="c">// English</span>
+	           <span class="s">'Motor {0}: Überstrom ({1} A, Grenze {2} A)'</span>]);         <span class="c">// German</span></code></pre>
+<ul><li>A missing translation shows the English text, so you can translate one line at a time.</li><li>A translation can put the placeholders in a different order.</li></ul>
+<h3 id="switching-the-language">Switching the language<a class="anchor" href="#switching-the-language" aria-label="Link to section">#</a></h3>
+<pre class="lang-iecst"><span class="tag">Structured Text</span><code>EventFramework.GVL_EventDefaults.fbLanguage.Current := EventFramework.E_Language.German;</code></pre>
+<p>The <code>EventFramework.</code> prefix is optional unless another library uses the same names.</p>
+<ul><li>The whole PLC uses one language.</li><li>The new language is used for events raised after the switch. Alarms that are already active keep their text.</li></ul>
+<h3 id="needing-another-language">Needing another language<a class="anchor" href="#needing-another-language" aria-label="Link to section">#</a></h3>
+<p>The available languages are part of the library. Ask for a library version that includes the language you need.</p>
+<hr>
+<h2 id="8-updating-to-a-new-library-version">8. Updating to a new library version<a class="anchor" href="#8-updating-to-a-new-library-version" aria-label="Link to section">#</a></h2>
+<ol><li>Put the new <code>EventFramework.library</code> (and <code>EventFramework.tmc</code>) in your framework folder.</li><li>Run the script again on your project. It installs the new version and updates the event classes. Your <code>GVL_EventTexts</code> stays as it is.</li><li>Build.</li></ol>
+<p>With the default version <code>*</code>, the project uses the newest installed version automatically. If you fixed a version with <code>-Version</code>, run the script with the new version number.</p>
+<hr>
+<h2 id="9-troubleshooting">9. Troubleshooting<a class="anchor" href="#9-troubleshooting" aria-label="Link to section">#</a></h2>
+<div class="table"><table><thead><tr><th>Problem</th><th>What to do</th></tr></thead><tbody><tr><td>The script says <em>No .library found</em> (or .tmc, or GVL)</td><td>Check the folder you passed. Or pass the file directly with <code>-LibraryPath</code>, <code>-TmcPath</code> or <code>-GvlTemplate</code>.</td></tr><tr><td>The script says the solution has several PLC projects</td><td>Add <code>-PlcProject &lt;name&gt;</code>.</td></tr><tr><td>The script says <em>RepTool.exe not found</em></td><td>TwinCAT XAE isn't installed on this PC. Install it, or use <code>-SkipInstall</code> and install the library by hand.</td></tr><tr><td>The script warns about a duplicate event class</td><td>The event classes are in the project twice. Remove the extra copy as the warning says.</td></tr><tr><td>XAE doesn't show the changes</td><td>Close and reopen the solution.</td></tr><tr><td><em>Library EventFramework not found</em> when building</td><td>The library isn't installed on this PC. Run the script, or install it in the library repository.</td></tr><tr><td><code>TC_EVENTS.GenericEvents</code> unknown when building</td><td>The event classes are missing. Run the script again.</td></tr><tr><td><code>TcEventSeverity</code> unknown when building</td><td>Add the <code>Tc3_EventLogger</code> library reference to the PLC project.</td></tr><tr><td>An alarm doesn't appear in the logger</td><td>Check <code>LastResult</code> of the alarm.</td></tr><tr><td>The text shows <code>{2}</code></td><td>The text has a placeholder without an argument. Add the argument or fix the text.</td></tr><tr><td>The text doesn't update while the alarm is active</td><td>That's intended: the text is fixed when the alarm is raised.</td></tr><tr><td>The text is in English after switching language</td><td>The translation is empty, or the alarm was raised before the switch.</td></tr><tr><td><code>SourceName</code> has no effect</td><td>Set it before the alarm is raised or the message is sent for the first time.</td></tr></tbody></table></div>
+</article></main>
+</div>
+<script>
+(function () {
+  var root = document.documentElement, key = 'eventfw-theme';
+  try { var t = localStorage.getItem(key); if (t) root.setAttribute('data-theme', t); } catch (e) {}
+  document.getElementById('theme').addEventListener('click', function () {
+    var dark = root.getAttribute('data-theme') === 'dark' ||
+      (!root.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+    var next = dark ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem(key, next); } catch (e) {}
+  });
+  // highlight the current section in the sidebar
+  var links = document.querySelectorAll('nav a');
+  var heads = Array.prototype.map.call(links, function (a) { return document.getElementById(a.hash.slice(1)); });
+  function spy() {
+    var current = 0;
+    heads.forEach(function (h, i) { if (h && h.getBoundingClientRect().top < 120) current = i; });
+    links.forEach(function (a, i) { a.classList.toggle('active', i === current); });
+  }
+  addEventListener('scroll', spy, { passive: true }); spy();
+})();
+</script>
+</body>
+</html>

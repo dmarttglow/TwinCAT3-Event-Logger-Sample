@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <GVL Name="GVL_EventTexts" Id="{00000000-0000-0000-0000-000000000000}">
+    <Declaration><![CDATA[// The event text list - the ONLY place to edit when adding an event. The TMC never changes.
+//   nId       unique, stable number (source info id, HMI filter, key for external/CSV texts)
+//   asText    one text per E_Language; {0}..{9} are replaced by the arguments
+// Replace the examples below with the events of this machine.
+{attribute 'qualified_only'}
+VAR_GLOBAL CONSTANT
+	MachineStarted		: ST_EventDefinition := (nId := 100, eSeverity := TcEventSeverity.Info,	asText := ['Machine {0} started']);
+	MotorOverCurrent	: ST_EventDefinition := (nId := 200, eSeverity := TcEventSeverity.Error,	asText := ['Motor {0}: over current ({1} A, limit {2} A)']);
+END_VAR
+]]></Declaration>
+  </GVL>
+</TcPlcObject>

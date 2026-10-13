@@ -1,12 +1,13 @@
-// Converts EventFramework.md into a self-contained EventFramework.html (no dependencies).
-// Usage:  node docs/build-html.js
+// Converts a doc (default EventFramework.md) into a self-contained .html next to it (no dependencies).
+// Usage:  node docs/build-html.js [UserGuide]
 // Supports the Markdown subset used by the docs: headings, paragraphs, (nested) lists,
 // tables, fenced code, hr, inline code/bold/italic/links.
 const fs = require('fs');
 const path = require('path');
 
-const SRC = path.join(__dirname, 'EventFramework.md');
-const OUT = path.join(__dirname, 'EventFramework.html');
+const NAME = (process.argv[2] || 'EventFramework').replace(/\.md$/, '');
+const SRC = path.join(__dirname, `${NAME}.md`);
+const OUT = path.join(__dirname, `${NAME}.html`);
 
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const slug = s => s.toLowerCase().replace(/<[^>]+>/g, '').replace(/[^a-z0-9 -]/g, '').trim().replace(/ /g, '-');
@@ -116,7 +117,7 @@ const page = `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Event Framework</title>
+<title>${esc(title)}</title>
 <style>
 :root {
   --bg: #fbfbfa; --surface: #ffffff; --text: #1d2125; --muted: #5b636b; --border: #e3e5e8;
