@@ -206,7 +206,7 @@ Arguments fill in `{0}` to `{9}` in the text, in the order they are added:
 
 ### Translating texts
 
-Put one text per language in `asText`, in this order: English, German.
+Put one text per language in `asText`, in this order: English, German, French, Spanish, Italian, Portuguese, Dutch, Danish, Swedish, Norwegian, Finnish. You can stop after the last language you translate.
 
 ```iecst
 MotorOverCurrent : ST_EventDefinition := (nId := 200, eSeverity := TcEventSeverity.Error,

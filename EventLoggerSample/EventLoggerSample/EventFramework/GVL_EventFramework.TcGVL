@@ -4,7 +4,7 @@
     <Declaration><![CDATA[{attribute 'qualified_only'}
 VAR_GLOBAL CONSTANT
 	cMaxArguments		: USINT := 10;				// placeholders {0}..{9}
-	cLanguageCount		: USINT := 2;				// number of values in E_Language - raise when adding a language
+	cLanguageCount		: USINT := 11;				// number of values in E_Language - raise when adding a language
 	HR_NO_CONTEXT		: HRESULT := -2147467261;	// 16#80004003 (E_POINTER): no I_EventContext was injected
 	HR_NOT_IMPLEMENTED	: HRESULT := -2147467263;	// 16#80004001 (E_NOTIMPL)
 END_VAR

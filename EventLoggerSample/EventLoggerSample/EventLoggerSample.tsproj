@@ -12,8 +12,8 @@
 			</TypeSystem>
 		</System>
 		<Plc>
-			<Project GUID="{EA22082E-84E5-4C2F-BB70-F26FC7FF8DFF}" Name="EventLoggerSample" PrjFilePath="EventLoggerSample\EventLoggerSample.plcproj" TmcFilePath="EventLoggerSample\EventLoggerSample.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{49519400-B19F-9443-ADF8-FA7FD63ABDF7}" TmcPath="EventLoggerSample\EventLoggerSample.tmc">
+			<Project GUID="{EA22082E-84E5-4C2F-BB70-F26FC7FF8DFF}" Name="EventLoggerSample" PrjFilePath="EventLoggerSample\EventLoggerSample.plcproj" TmcFilePath="EventLoggerSample\EventLoggerSample.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x000f" FileArchiveSettings="#x000e" SymbolicMapping="true">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{255F75F5-A304-484D-84CE-B4CC46AFA88F}" TmcPath="EventLoggerSample\EventLoggerSample.tmc">
 					<Name>EventLoggerSample Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Contexts>

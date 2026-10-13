@@ -4,11 +4,21 @@
     <Declaration><![CDATA[// Languages of the event texts. The first value is the default/fallback language.
 // Adding one: add a value here, raise GVL_EventFramework.cLanguageCount,
 // then add the translation to the lines in GVL_EventTexts (missing ones fall back to the default).
+// Only languages whose characters fit in STRING (Windows-1252); other alphabets would need WSTRING.
 {attribute 'qualified_only'}
 TYPE E_Language :
 (
-	English := 0,
-	German	:= 1
+	English		:= 0,
+	German		:= 1,
+	French		:= 2,
+	Spanish		:= 3,
+	Italian		:= 4,
+	Portuguese	:= 5,
+	Dutch		:= 6,
+	Danish		:= 7,
+	Swedish		:= 8,
+	Norwegian	:= 9,
+	Finnish		:= 10
 ) USINT;
 END_TYPE
 ]]></Declaration>
